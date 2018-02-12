@@ -1,7 +1,7 @@
 #include "zmq_listener.h"
 
 namespace bitmile {
-  ZMQListener::ZMQListener() {
+  ZmqListener::ZmqListener() {
     //default contructor
 
     //init context
@@ -19,19 +19,19 @@ namespace bitmile {
     Start();
   }
 
-  void ZMQListener::Start() {
+  void ZmqListener::Start() {
     pthread_create(&zmq_thread_, NULL, StartInitConnection, this);
   }
 
-  void *ZMQListener::StartWorkerRoutine(void *arg) {
+  void *ZmqListener::StartWorkerRoutine(void *arg) {
     //TODO: handle pointer casting properly, should not cast directly
 
     assert (arg != NULL);
 
-    return ((ZMQListener*) arg)->WorkerRoutine(((ZMQListener*) arg)->context_);
+    return ((ZmqListener*) arg)->WorkerRoutine(((ZmqListener*) arg)->context_);
   }
 
-  void *ZMQListener::WorkerRoutine(void *arg) {
+  void *ZmqListener::WorkerRoutine(void *arg) {
     assert (arg != NULL);
 
     //get context object from argument
@@ -44,13 +44,13 @@ namespace bitmile {
     return NULL;
   }
 
-  void *ZMQListener::StartInitConnection(void *arg) {
+  void *ZmqListener::StartInitConnection(void *arg) {
     assert (arg != NULL);
 
-    return ((ZMQListener*) arg)->InitConnection(NULL);
+    return ((ZmqListener*) arg)->InitConnection(NULL);
   }
 
-  void *ZMQListener::InitConnection(void *arg) {
+  void *ZmqListener::InitConnection(void *arg) {
 
     //TODO: change port to dynamic
     //start accepting connection from clients

@@ -8,7 +8,7 @@
 namespace bitmile {
 
   /*!
-   * ZMQListener class function:
+   * ZmqListener class function:
    * 1. receive message from outside clients
    * 2. pass messages to multiple workers for processing
    * 3. send result back to clients
@@ -21,9 +21,9 @@ namespace bitmile {
    * more info here: http://zguide.zeromq.org/page:all#Multithreading-with-ZeroMQ
    */
 
-  class ZMQListener {
+  class ZmqListener {
   public:
-    ZMQListener();
+    ZmqListener();
 
   private:
     pthread_t zmq_thread_ ; /*!< thread for clients listener */
