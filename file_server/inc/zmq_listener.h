@@ -4,6 +4,8 @@
 #include <zmq.hpp>
 #include <pthread.h>
 #include <assert.h>
+#include <message.h>
+#include <message_handler.h>
 
 namespace bitmile {
 
@@ -50,6 +52,10 @@ namespace bitmile {
     zmq::socket_t *workers_socket_; /*!< socket for workers */
 
     int num_workers_; /*!< number of working workers */
+
+    MessageHandler* msg_handler_; /*!< pointer to message handler class */
+
+    //TODO: need a message parser that convert between bitmile message and zmq message
   };
 }//namespace bitmile
 #endif

@@ -15,6 +15,9 @@ namespace bitmile {
     //init number of workers
     num_workers_ = 5;
 
+
+    msg_handler_ = new MessageHandler();
+
     //start network connection
     Start();
   }
@@ -38,7 +41,11 @@ namespace bitmile {
     zmq::context_t *context = (zmq::context_t *) arg;
 
     while (1) {
-      //TODO: handle message here
+      //TODO: parse and handle message here
+      msg::Message mes;
+      msg::Message ret_mes = msg_handler_->Handle (mes);
+
+      //TODO: change ret_mes to zmq format
     }
 
     return NULL;
