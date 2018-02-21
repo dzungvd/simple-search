@@ -4,8 +4,8 @@
 #include <zmq.hpp>
 #include <pthread.h>
 #include <assert.h>
-#include <message.h>
-#include <message_handler.h>
+#include "message.h"
+#include "message_handler.h"
 
 namespace bitmile {
 

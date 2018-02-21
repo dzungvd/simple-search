@@ -5,12 +5,13 @@
 namespace bitmile{
   class MessageHandler {
   public:
+    MessageHandler() {}
     /*! detect types and handle message of each type*/
     msg::Message Handle (msg::Message mes);
 
   private:
     //database interface
 
-  }
+  };
 }//namespace bitmile
 #endif

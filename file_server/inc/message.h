@@ -1,6 +1,8 @@
 #ifndef _MESSAGE_H
 #define _MESSAGE_H
+
 #include <vector>
+
 namespace bitmile{
 namespace msg {
 
@@ -12,7 +14,7 @@ namespace msg {
 
   struct Message {
     MessageType type;
-    vector<char> data;
+    std::vector<char> data;
   };
 
 } //namespace msg
