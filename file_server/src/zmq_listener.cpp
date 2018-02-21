@@ -40,12 +40,27 @@ namespace bitmile {
     //get context object from argument
     zmq::context_t *context = (zmq::context_t *) arg;
 
+    zmq::socket_t socket (*context, ZMQ_REP);
+    socket.connect ("inproc://workers");
+
     while (1) {
-      //TODO: parse and handle message here
+      //receive raw message from zmq socket
+      zmq::message_t request;
+      socket.recv(&request);
+
+      //parse and handle message here
       msg::Message mes;
+      mes.Deserialize((char*)request.data(), request.size());
+
       msg::Message ret_mes = msg_handler_->Handle (mes);
 
-      //TODO: change ret_mes to zmq format
+      //make zmq message and send it back to client
+      std::vector<char> ret_data = ret_mes.Serialize();
+      zmq::message_t reply (ret_data.size());
+
+      memcpy ((void*) reply.data(), ret_data.data(), ret_data.size());
+
+      socket.send(reply);
     }
 
     return NULL;
@@ -61,7 +76,7 @@ namespace bitmile {
 
     //TODO: change port to dynamic
     //start accepting connection from clients
-    clients_socket_->bind ("tcp://*5555");
+    clients_socket_->bind ("tcp://*:5555");
 
     //init connection for worker threads
     workers_socket_->bind ("inproc://workers");
@@ -69,12 +84,12 @@ namespace bitmile {
     //start workers threads
     for (int num_threads = 0; num_threads < num_workers_; num_threads++) {
       pthread_t worker;
-      //TODO: create threads with worker function herer
+      //create threads with worker function here
       pthread_create (&worker, NULL, StartWorkerRoutine, this);
     }
 
     //link current threads to workers threads
-    zmq::proxy (clients_socket_, workers_socket_, NULL);
+    zmq::proxy (*clients_socket_, *workers_socket_, NULL);
 
     return NULL;
   }

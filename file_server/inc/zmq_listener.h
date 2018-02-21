@@ -55,7 +55,6 @@ namespace bitmile {
 
     MessageHandler* msg_handler_; /*!< pointer to message handler class */
 
-    //TODO: need a message parser that convert between bitmile message and zmq message
   };
 }//namespace bitmile
 #endif
