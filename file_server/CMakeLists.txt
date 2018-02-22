@@ -39,3 +39,5 @@ find_library(ZeroMQ_LIBRARY
 target_include_directories(${PROJ_NAME} PUBLIC ${ZeroMQ_INCLUDE_DIR})
 ## at the 0mq library to our link directive
 target_link_libraries(${PROJ_NAME} PUBLIC ${ZeroMQ_LIBRARY})
+
+add_subdirectory(tools)
