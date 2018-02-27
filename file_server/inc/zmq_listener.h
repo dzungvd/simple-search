@@ -27,6 +27,12 @@ namespace bitmile {
   public:
     ZmqListener();
 
+    ~ZmqListener() {
+      delete context_;
+      delete clients_socket_;
+      delete workers_socket_;
+      delete msg_handler_;
+    }
   private:
     pthread_t zmq_thread_ ; /*!< thread for clients listener */
 
