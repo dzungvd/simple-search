@@ -89,7 +89,8 @@ namespace bitmile {
     }
 
     //link current threads to workers threads
-    zmq::proxy (*clients_socket_, *workers_socket_, NULL);
+    //add static_cast <void*> here to make zmq work with c++11 or else it will fail to compile
+    zmq::proxy (static_cast<void*> (*clients_socket_), static_cast<void*>(*workers_socket_), NULL);
 
     return NULL;
   }
