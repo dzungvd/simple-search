@@ -8,11 +8,13 @@ namespace bitmile{
   public:
     MessageHandler() {}
     /*! detect types and handle message of each type*/
-    msg::Message Handle (msg::Message mes);
+    msg::Message* Handle (msg::Message* mes);
 
   private:
     /*!< database interface */
     DbInterface db_;
+
+    msg::MessageFactory mes_factory_;
   };
 }//namespace bitmile
 #endif

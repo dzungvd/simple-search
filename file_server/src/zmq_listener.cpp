@@ -48,17 +48,34 @@ namespace bitmile {
       zmq::message_t request;
       socket.recv(&request);
 
-      //parse and handle message here
-      msg::Message mes;
-      mes.Deserialize((char*)request.data(), request.size());
+      msg::Message* mes;
 
-      msg::Message ret_mes = msg_handler_->Handle (mes);
+      if (request.size() >= sizeof (msg::MessageType)) {
+        //get message type first
+        msg::MessageType type;
+        memcpy (&type, (char*)request.data(), sizeof (msg::MessageType));
+
+        //parse raw data into specific message format
+        mes = mes_factory_.CreateMessage(type, (char*)request.data() + sizeof (msg::MessageType), request.size() - sizeof (msg::MessageType));
+
+      }else {
+        //error - can't parse message type
+        mes = mes_factory_.CreateMessage(msg::MessageType::ERROR, NULL, 0);
+      }
+
+      //handle input message
+      msg::Message* ret_mes = msg_handler_->Handle (mes);
 
       //make zmq message and send it back to client
-      std::vector<char> ret_data = ret_mes.Serialize();
-      zmq::message_t reply (ret_data.size());
+      std::vector<char> ret_data;
+      ret_mes->Serialize(ret_data);
 
+      zmq::message_t reply (ret_data.size());
       memcpy ((void*) reply.data(), ret_data.data(), ret_data.size());
+
+      //free up memory from intermediate message
+      delete mes;
+      delete ret_mes;
 
       socket.send(reply);
     }

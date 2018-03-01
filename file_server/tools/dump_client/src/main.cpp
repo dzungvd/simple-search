@@ -13,12 +13,18 @@ int main () {
   zmq::context_t context(1);
   zmq::socket_t socket (context, ZMQ_REQ);
   socket.connect("tcp://localhost:5555");
+
+  bitmile::msg::MessageFactory mes_factory;
   for (int i = 0; i < 100; i++) {
 
-    bitmile::msg::Message mes;
-    mes.type = bitmile::msg::KEYWORD_QUERY;
+    bitmile::msg::Message* mes;
+    mes = mes_factory.CreateMessage(bitmile::msg::KEYWORD_QUERY, NULL, 0);
 
-    std::vector<char> req_data = mes.Serialize();
+    std::vector<char> req_data;
+    mes->Serialize(req_data);
+
+    std::cout << "mes type:  " << mes->Type() << " size: " << req_data.size() << std::endl;
+    delete mes;
     zmq::message_t request (req_data.size());
 
     memcpy (request.data(), req_data.data(), req_data.size());
@@ -30,10 +36,14 @@ int main () {
     zmq::message_t reply;
     socket.recv(&reply);
 
-    bitmile::msg::Message rep_mes;
-    rep_mes.Deserialize ((char*) reply.data(), reply.size());
 
-    std::cout << "got reply with type: " << rep_mes.type << " data size: " << rep_mes.data.size() << std::endl;
+    bitmile::msg::MessageType type;
+    if (sizeof (bitmile::msg::MessageType) > reply.size()) {
+      std::cout << "message size smaller than message type variable" << std::endl;
+    }
+    memcpy (&type, (char*)reply.data(), sizeof (bitmile::msg::MessageType));
+
+    std::cout << "got reply with type: " << type << " data size: " << reply.size() - sizeof (bitmile::msg::MessageType) << std::endl;
   }
   return 0;
 }

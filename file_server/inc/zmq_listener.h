@@ -60,7 +60,7 @@ namespace bitmile {
     int num_workers_; /*!< number of working workers */
 
     MessageHandler* msg_handler_; /*!< pointer to message handler class */
-
+    msg::MessageFactory mes_factory_;
   };
 }//namespace bitmile
 #endif

@@ -2,15 +2,18 @@
 
 namespace bitmile {
 
-  msg::Message MessageHandler::Handle (msg::Message mes) {
-    msg::Message reply;
-    switch (mes.type) {
+  msg::Message* MessageHandler::Handle (msg::Message* mes) {
+    msg::Message* reply;
+    switch (mes->Type()) {
     case msg::KEYWORD_QUERY:
       //TODO: forward query to database server
-      reply.type = msg::KEYWORD_QUERY_REPLY;
+      reply = mes_factory_.CreateMessage (msg::MessageType::KEYWORD_QUERY_REPLY, NULL, 0);
+      break;
+    case msg::BLANK:
+      reply = mes_factory_.CreateMessage (msg::MessageType::BLANK, NULL, 0);
       break;
     default:
-      reply.type = msg::BLANK;
+      reply = mes_factory_.CreateMessage (msg::MessageType::ERROR, NULL, 0);
       break;
     }
     return reply;
