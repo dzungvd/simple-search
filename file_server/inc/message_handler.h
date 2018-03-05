@@ -10,6 +10,7 @@ namespace bitmile{
     /*! detect types and handle message of each type*/
     msg::Message* Handle (msg::Message* mes);
 
+    msg::Message* HandleKeywordQuery (msg::Message* query);
   private:
     /*!< database interface */
     DbInterface db_;

@@ -26,7 +26,7 @@ namespace msg {
     virtual void Serialize(std::vector<char>& return_data) = 0;
 
   protected:
-    virtual void Deserialize(char* dat, size_t size) = 0;
+    virtual void Deserialize(const char* dat, size_t size) = 0;
     MessageType type_;
   };
 
@@ -35,7 +35,7 @@ namespace msg {
     KeywordQueryMes(MessageType type, char* dat, size_t size);
     void Serialize (std::vector<char>& return_data);
   protected:
-    void Deserialize(char* dat, size_t size);
+    void Deserialize(const char* dat, size_t size);
 
   private:
     std::vector<std::string> keywords_;
@@ -46,7 +46,7 @@ namespace msg {
     KeywordQueryReplyMes(MessageType type, char* dat, size_t size);
     void Serialize (std::vector<char>& return_data);
   protected:
-    void Deserialize(char* dat, size_t size);
+    void Deserialize(const char* dat, size_t size);
 
   };
 
@@ -55,7 +55,7 @@ namespace msg {
     ErrorMes (MessageType type, char* dat, size_t size);
     void Serialize (std::vector<char>& return_data);
   protected:
-    void Deserialize (char* dat, size_t size);
+    void Deserialize (const char* dat, size_t size);
   private:
     std::string message;
   };
@@ -65,7 +65,7 @@ namespace msg {
     BlankMes (MessageType type, char* dat, size_t size);
     void Serialize (std::vector<char>& return_data);
   protected:
-    void Deserialize (char* dat, size_t size) {}
+    void Deserialize (const char* dat, size_t size) {}
   };
 
   class MessageFactory {
@@ -73,7 +73,7 @@ namespace msg {
     Message* CreateMessage (MessageType type, char* dat, size_t size);
 
   protected:
-    void Deserialize (char* dat, size_t size);
+    void Deserialize (const char* dat, size_t size);
   };
 } //namespace msg
 }//namespace bitmile

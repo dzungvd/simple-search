@@ -7,7 +7,7 @@ namespace bitmile {
     switch (mes->Type()) {
     case msg::KEYWORD_QUERY:
       //TODO: forward query to database server
-      reply = mes_factory_.CreateMessage (msg::MessageType::KEYWORD_QUERY_REPLY, NULL, 0);
+      reply = HandleKeywordQuery (mes);
       break;
     case msg::BLANK:
       reply = mes_factory_.CreateMessage (msg::MessageType::BLANK, NULL, 0);
@@ -19,4 +19,10 @@ namespace bitmile {
     return reply;
   }
 
+  msg::Message* MessageHandler::HandleKeywordQuery (msg::Message* query) {
+
+    //get all user encrypt password
+    //encrypt all keywords and send query to database server
+
+  }
 }//namespace bitmile
