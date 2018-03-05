@@ -23,6 +23,16 @@ namespace bitmile {
 
     //get all user encrypt password
     //encrypt all keywords and send query to database server
+    msg::KeywordQueryMes* keyword_query = static_cast <msg::KeywordQueryMes*> (query);
+
+    std::vector<db::Document> results;
+
+    //send query to database
+    db_.QueryDocWithKeywords (keyword_query->GetKeywords(), results);
+
+
+    //create a reply message
+    msg::Message* reply = mes_factory_.CreateMessage (msg::MessageType::KEYWORD_QUERY_REPLY, NULL, 0);
 
   }
 }//namespace bitmile

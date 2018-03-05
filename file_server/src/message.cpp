@@ -82,6 +82,9 @@ namespace bitmile {
 
     }
 
+    std::vector<std::string> KeywordQueryMes::GetKeywords() {
+      return keywords_;
+    }
     KeywordQueryReplyMes::KeywordQueryReplyMes (MessageType type, char* dat, size_t size) {
       type_ = type;
       Deserialize (dat, size);

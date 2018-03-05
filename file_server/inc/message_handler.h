@@ -13,7 +13,7 @@ namespace bitmile{
     msg::Message* HandleKeywordQuery (msg::Message* query);
   private:
     /*!< database interface */
-    DbInterface db_;
+    db::DbInterface db_;
 
     msg::MessageFactory mes_factory_;
   };

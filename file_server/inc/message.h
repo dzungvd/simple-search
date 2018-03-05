@@ -34,6 +34,8 @@ namespace msg {
   public:
     KeywordQueryMes(MessageType type, char* dat, size_t size);
     void Serialize (std::vector<char>& return_data);
+
+    std::vector<std::string> GetKeywords();
   protected:
     void Deserialize(const char* dat, size_t size);
 
