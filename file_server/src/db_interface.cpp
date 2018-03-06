@@ -157,7 +157,6 @@ namespace bitmile{
        *}
        */
       Json::Object j_result;
-
       try{
         if (!elastic_search_->search(index_, type_, query_level.str(), j_result)) {
           std::cout << "can't find any doc matched query" << std::endl;
@@ -170,7 +169,6 @@ namespace bitmile{
 
       Json::Array hit_list;
       hit_list = j_result.getValue("hits").getObject().getValue("hits").getArray();
-
       Json::Array::const_iterator hit_list_iter = hit_list.begin();
 
       while (hit_list_iter != hit_list.end()) {

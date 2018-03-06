@@ -48,6 +48,7 @@ namespace msg {
     KeywordQueryReplyMes(MessageType type, char* dat, size_t size);
     void Serialize (std::vector<char>& return_data);
     void SetDocuments (std::vector<db::Document>& input_doc);
+    std::vector <db::Document> GetDocs ();
   protected:
     void Deserialize(const char* dat, size_t size);
     std::vector<db::Document> docs_;

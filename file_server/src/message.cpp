@@ -12,16 +12,16 @@ namespace bitmile {
       /*
        * Parse binary data
        */
-
-
       if (size <= 1) {
+        std::cout << "invalid querry" << std::endl;
         //invalid string since one string must contain
         //at least one charater and a NULL character
         //no need to parse
         return;
       }
 
-      if (dat[size] != '\0') {
+      if (dat[size-1] != '\0') {
+        std::cout << "last character is not null" << std::endl;
         //the last character should be a terminate NULL
         //or else it's an invalid message
         return;
@@ -64,6 +64,7 @@ namespace bitmile {
       int offset = 0;
 
       memcpy (&return_data[offset], &type_, sizeof (MessageType));
+      offset += sizeof (MessageType);
 
       for (int i = 0; i < keywords_.size(); i++) {
         memcpy (&return_data[offset], keywords_[i].c_str(), keywords_[i].length() + 1);
@@ -104,6 +105,7 @@ namespace bitmile {
       return_data.resize (size);
       int offset = 0;
       memcpy (&return_data[offset], &type_, sizeof (MessageType));
+      offset += sizeof (MessageType);
 
       std::string owner_addr, owner_doc_id, elastic_id;
       for (int i = 0; i < docs_.size() ; i++) {
@@ -127,6 +129,7 @@ namespace bitmile {
       }
 
       if (dat[size - 1] != '\0'){
+        std::cout << "string does not contain NULL terminate" << std::endl;
         //query string must contain NULL character at the end
         return;
       }
@@ -141,7 +144,7 @@ namespace bitmile {
         //length is word length + 1 NULL char
         parsed_word_len = parsed_word.length() + 1;
         temp_doc.SetOwnerAddress (parsed_word);
-        if (offset < size) return;
+        if (offset >= size) return;
         dat += parsed_word_len;
         offset += parsed_word_len;
 
@@ -149,7 +152,7 @@ namespace bitmile {
         //length is word length + 1 NULL char
         parsed_word_len = parsed_word.length() + 1;
         temp_doc.SetOwnerDocId (parsed_word);
-        if (offset < size) return;
+        if (offset >= size) return;
         dat += parsed_word_len;
         offset += parsed_word_len;
 
@@ -157,7 +160,7 @@ namespace bitmile {
         //length is word length + 1 NULL char
         parsed_word_len = parsed_word.length() + 1;
         temp_doc.SetElasticDocId (parsed_word);
-        if (offset < size) return;
+        if (offset >= size) return;
         dat += parsed_word_len;
         offset += parsed_word_len;
 
@@ -167,6 +170,10 @@ namespace bitmile {
 
     void KeywordQueryReplyMes::SetDocuments (std::vector<db::Document>& input_doc) {
       docs_ = std::vector <db::Document> (input_doc);
+    }
+
+    std::vector<db::Document> KeywordQueryReplyMes::GetDocs () {
+      return docs_;
     }
     ErrorMes::ErrorMes (MessageType type, char* dat, size_t size){
       type_ = type;
