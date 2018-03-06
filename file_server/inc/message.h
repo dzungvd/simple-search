@@ -6,7 +6,7 @@
 #include <assert.h>
 #include <string>
 #include <cstring>
-
+#include "db_interface.h"
 namespace bitmile{
 namespace msg {
 
@@ -47,9 +47,10 @@ namespace msg {
   public:
     KeywordQueryReplyMes(MessageType type, char* dat, size_t size);
     void Serialize (std::vector<char>& return_data);
+    void SetDocuments (std::vector<db::Document>& input_doc);
   protected:
     void Deserialize(const char* dat, size_t size);
-
+    std::vector<db::Document> docs_;
   };
 
   class ErrorMes : public Message {

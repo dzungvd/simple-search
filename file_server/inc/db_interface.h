@@ -19,8 +19,13 @@ namespace bitmile{
     public:
       bool ParseJson (Json::Object json_doc);
       std::string GetOwnerAddress();
+      void SetOwnerAddress(std::string& addr);
+
       std::string GetOwnerDocId();
+      void SetOwnerDocId (std::string& docId);
+
       std::string GetElasticDocId();
+      void SetElasticDocId(std::string& id);
     };
 
     class DbInterface {

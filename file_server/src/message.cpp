@@ -13,8 +13,6 @@ namespace bitmile {
        * Parse binary data
        */
 
-      int offset = 0;
-
 
       if (size <= 1) {
         //invalid string since one string must contain
@@ -30,6 +28,7 @@ namespace bitmile {
       }
 
       //TODO: handle case "continuous NULL character"
+      int offset = 0;
       int keyword_len = 0;
       while (offset < size) {
         keywords_.push_back (std::string (dat));
@@ -122,7 +121,48 @@ namespace bitmile {
 
     }
     void KeywordQueryReplyMes::Deserialize (const char* dat, size_t size) {
+      if (size < 1) {
+        //invalid string
+        return;
+      }
 
+      if (dat[size - 1] != '\0'){
+        //query string must contain NULL character at the end
+        return;
+      }
+
+      int offset = 0;
+      std::string parsed_word;
+      int parsed_word_len = 0;
+      db::Document temp_doc;
+      while (offset < size) {
+
+        parsed_word = std::string (dat);
+        //length is word length + 1 NULL char
+        parsed_word_len = parsed_word.length() + 1;
+        temp_doc.SetOwnerAddress (parsed_word);
+        if (offset < size) return;
+        dat += parsed_word_len;
+        offset += parsed_word_len;
+
+        parsed_word = std::string (dat);
+        //length is word length + 1 NULL char
+        parsed_word_len = parsed_word.length() + 1;
+        temp_doc.SetOwnerDocId (parsed_word);
+        if (offset < size) return;
+        dat += parsed_word_len;
+        offset += parsed_word_len;
+
+        parsed_word = std::string (dat);
+        //length is word length + 1 NULL char
+        parsed_word_len = parsed_word.length() + 1;
+        temp_doc.SetElasticDocId (parsed_word);
+        if (offset < size) return;
+        dat += parsed_word_len;
+        offset += parsed_word_len;
+
+        docs_.push_back (temp_doc);
+      }
     }
 
     void KeywordQueryReplyMes::SetDocuments (std::vector<db::Document>& input_doc) {

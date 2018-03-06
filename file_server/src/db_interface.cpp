@@ -6,14 +6,25 @@ namespace bitmile{
     std::string Document::GetOwnerAddress () {
       return owner_address_;
     }
+    void Document::SetOwnerAddress (std::string& addr) {
+      owner_address_ = addr;
+    }
+
     std::string Document::GetOwnerDocId() {
       return doc_id_;
+    }
+
+    void Document::SetOwnerDocId (std::string& id) {
+      doc_id_ = id;
     }
 
     std::string Document::GetElasticDocId() {
       return elastic_doc_id_;
     }
 
+    void Document::SetElasticDocId (std::string& id) {
+      elastic_doc_id_ = id;
+    }
     bool Document::ParseJson (Json::Object json_doc) {
       /*     {
        *        "_index": "user_data",

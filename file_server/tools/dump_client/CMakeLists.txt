@@ -1,8 +1,18 @@
 set (PROJ_NAME dump_client)
 set (PROJ_INCLUDES "inc;../../inc")
-set (PROJ_SOURCE "src/main.cpp" "../../src/message.cpp")
+set (PROJ_SOURCE "src/main.cpp" "../../src/message.cpp" "../../src/db_interface.cpp")
 
-INCLUDE_DIRECTORIES(${PROJ_INCLUDES})
+
+#add elastic cpp to our project
+set(ELASTIC_CPP_FOLDER "../../vendors/cpp-elasticsearch/src")
+set(ELASTIC_CPP_SOURCE "${ELASTIC_CPP_FOLDER}/elasticsearch/elasticsearch.cpp" "${ELASTIC_CPP_FOLDER}/json/json.cpp" "${ELASTIC_CPP_FOLDER}/http/http.cpp")
+
+set(ELASTIC_CPP_INC "../../vendors/cpp-elasticsearch/src")
+
+list(APPEND PROJ_SOURCE ${ELASTIC_CPP_SOURCE})
+
+
+INCLUDE_DIRECTORIES("${PROJ_INCLUDES}" "${ELASTIC_CPP_INC}")
 
 add_executable(${PROJ_NAME} ${PROJ_SOURCE})
 
