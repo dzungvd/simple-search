@@ -6,6 +6,12 @@
 #include <vector>
 #include <map>
 
+#include "nlohmann/json.hpp"
+
+extern "C" {
+#include "sodium.h"
+}
+
 namespace bitmile{
 
   namespace db {
@@ -14,18 +20,24 @@ namespace bitmile{
       std::string owner_address_;
       std::string doc_id_;
       std::string elastic_doc_id_;
-      std::string data_;
+      std::vector<char> data_;
 
     public:
+      nlohmann::json ToJson ();
+      bool FromJson (nlohmann::json& doc);
+
       bool ParseJson (Json::Object json_doc);
       std::string GetOwnerAddress();
-      void SetOwnerAddress(std::string& addr);
+      void SetOwnerAddress(std::string addr);
 
       std::string GetOwnerDocId();
-      void SetOwnerDocId (std::string& docId);
+      void SetOwnerDocId (std::string docId);
 
       std::string GetElasticDocId();
-      void SetElasticDocId(std::string& id);
+      void SetElasticDocId(std::string id);
+
+      void SetData (const char* dat, const size_t size);
+      const std::vector<char>& GetData ();
     };
 
     class DbInterface {

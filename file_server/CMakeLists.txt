@@ -5,15 +5,17 @@ set(PROJ_INCLUDES "inc")
 set(PROJ_SOURCE "src/main.cpp" "src/zmq_listener.cpp" "src/message.cpp" "src/message_handler.cpp" "src/db_interface.cpp")
 
 #add elastic cpp to our project
-set(ELASTIC_CPP_FOLDER "vendors/cpp-elasticsearch/src")
+set(ELASTIC_CPP_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/vendors/cpp-elasticsearch/src")
 set(ELASTIC_CPP_SOURCE "${ELASTIC_CPP_FOLDER}/elasticsearch/elasticsearch.cpp" "${ELASTIC_CPP_FOLDER}/json/json.cpp" "${ELASTIC_CPP_FOLDER}/http/http.cpp")
 
-set(ELASTIC_CPP_INC "vendors/cpp-elasticsearch/src")
+set(ELASTIC_CPP_INC "${CMAKE_CURRENT_SOURCE_DIR}/vendors/cpp-elasticsearch/src")
 
 list(APPEND PROJ_SOURCE ${ELASTIC_CPP_SOURCE})
 
+#add json library
+set(JSON_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/vendors/nlohmann_json")
 
-INCLUDE_DIRECTORIES("${PROJ_INCLUDES}" "${ELASTIC_CPP_INC}")
+INCLUDE_DIRECTORIES("${PROJ_INCLUDES}" "${ELASTIC_CPP_INC}" "${JSON_FOLDER}")
 
 add_executable(${PROJ_NAME} ${PROJ_SOURCE})
 
@@ -48,5 +50,17 @@ find_library(ZeroMQ_LIBRARY
 target_include_directories(${PROJ_NAME} PUBLIC ${ZeroMQ_INCLUDE_DIR})
 ## at the 0mq library to our link directive
 target_link_libraries(${PROJ_NAME} PUBLIC ${ZeroMQ_LIBRARY})
+
+#sodium library
+#add find sodium package
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/")
+message ("cmake module ${CMAKE_MODULE_PATH}")
+
+#use static lib
+set(sodium_USE_STATIC_LIBS TRUE)
+
+find_package (sodium REQUIRED)
+target_include_directories(${PROJ_NAME} PUBLIC ${sodium_INCLUDE_DIR})
+target_link_libraries(${PROJ_NAME} PUBLIC ${sodium_LIBRARY_RELEASE})
 
 add_subdirectory(tools)

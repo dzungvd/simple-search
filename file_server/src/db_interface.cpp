@@ -3,10 +3,82 @@
 
 namespace bitmile{
   namespace db{
+    nlohmann::json Document::ToJson () {
+      nlohmann::json json_doc;
+      json_doc["owner_address"] = owner_address_;
+      json_doc["doc_id"] = doc_id_;
+      json_doc["elastic_doc_id"] = elastic_doc_id_;
+
+      if (data_.size() > 0) {
+        //convert data to base64 form before pass it to json doc
+        unsigned b64_len = sodium_base64_ENCODED_LEN(data_.size(), sodium_base64_VARIANT_ORIGINAL);
+        if (b64_len > 0) {
+          char* b64_str = new char[b64_len];
+
+          //compiler complain it can't convert from char* to const unsigned char* so create a temporary space then copy the data to this space
+
+          sodium_bin2base64 (b64_str, b64_len,
+                             reinterpret_cast<unsigned char*> (data_.data()), data_.size(),
+                             sodium_base64_VARIANT_ORIGINAL);
+
+          json_doc["data"] = b64_str;
+          json_doc["data_size"] = data_.size();
+
+          delete[] b64_str;
+        }
+      }
+
+      return json_doc;
+
+    }
+
+    bool Document::FromJson (nlohmann::json& doc) {
+      if (doc.count ("owner_address") != 1 ||
+          doc.count ("doc_id") != 1 ||
+          doc.count ("elastic_doc_id") > 1 ||
+          doc.count ("data") > 1) {
+        //invalid message
+        return false;
+      }
+
+      owner_address_ = doc["owner_address"];
+      doc_id_ = doc["doc_id"];
+
+      if (doc.find ("elastic_doc_id") != doc.end()) {
+        elastic_doc_id_ = doc["elastic_doc_id"];
+      }
+
+      if (doc.find ("data") != doc.end()) {
+        if (doc.count ("data_size") != 1) {
+          return false;
+        }
+        //get base 64 string
+        std::string b64_data = doc["data"];
+        size_t bin_size = doc["data_size"];
+        data_.resize (bin_size);
+        size_t decode_bin_size;
+        if (sodium_base642bin (reinterpret_cast<unsigned char*> (data_.data()), bin_size,
+                           b64_data.data(), b64_data.length(),
+                           NULL, &decode_bin_size,
+                               NULL, sodium_base64_VARIANT_ORIGINAL)) {
+          //failed to decode string
+          return false;
+        }
+
+        if (decode_bin_size != bin_size) {
+          //binary size get from client should match
+          //decoded size
+          return false;
+        }
+      }
+
+      return true;
+    }
+
     std::string Document::GetOwnerAddress () {
       return owner_address_;
     }
-    void Document::SetOwnerAddress (std::string& addr) {
+    void Document::SetOwnerAddress (std::string addr) {
       owner_address_ = addr;
     }
 
@@ -14,7 +86,7 @@ namespace bitmile{
       return doc_id_;
     }
 
-    void Document::SetOwnerDocId (std::string& id) {
+    void Document::SetOwnerDocId (std::string id) {
       doc_id_ = id;
     }
 
@@ -22,7 +94,7 @@ namespace bitmile{
       return elastic_doc_id_;
     }
 
-    void Document::SetElasticDocId (std::string& id) {
+    void Document::SetElasticDocId (std::string id) {
       elastic_doc_id_ = id;
     }
     bool Document::ParseJson (Json::Object json_doc) {
@@ -74,6 +146,15 @@ namespace bitmile{
       doc_id_ = json_source["docId"].getString();
 
       return true;
+    }
+
+    void Document::SetData (const char* dat, const size_t size) {
+      data_.resize (size);
+      memcpy (data_.data(), dat, size);
+    }
+
+    const std::vector<char>& Document::GetData() {
+      return data_;
     }
 
     DbInterface::DbInterface() {
