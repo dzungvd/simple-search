@@ -9,6 +9,9 @@ namespace bitmile {
       //TODO: forward query to database server
       reply = HandleKeywordQuery (mes);
       break;
+    case msg::UPLOAD_DOC:
+      reply = HandleUploadDoc (mes);
+      break;
     case msg::BLANK:
       reply = mes_factory_.CreateMessage (msg::MessageType::BLANK, NULL, 0);
       break;
@@ -40,6 +43,33 @@ namespace bitmile {
     msg::Message* reply = mes_factory_.CreateMessage (msg::MessageType::KEYWORD_QUERY_REPLY, NULL, 0);
 
     (static_cast <msg::KeywordQueryReplyMes*> (reply))->SetDocuments (results);
+
+    return reply;
+  }
+
+  msg::Message* MessageHandler::HandleUploadDoc (msg::Message* mes) {
+    msg::UploadDocMes* upload_doc_mes = static_cast<msg::UploadDocMes*> (mes);
+
+    const db::Document& doc = upload_doc_mes->GetDoc();
+
+    //document must contain data, owner address, keywords and id
+
+    std::string owner_address = doc.GetOwnerAddress();
+    std::string doc_id = doc.GetOwnerDocId();
+    const std::vector<char>& data = doc.GetData();
+
+    if (owner_address.length() == 0 ||
+        doc_id.length() == 0 ||
+        data.size() == 0) {
+      //return error code here
+    }
+
+    //put owner_address, doc_id, keywords to elastic db
+
+    //save data to file
+
+    int code = 200;
+    msg::Message* reply = mes_factory_.CreateMessage (msg::MessageType::UPLOAD_DOC_REPLY, (char*)&code, (size_t)(sizeof (int)));
 
     return reply;
   }

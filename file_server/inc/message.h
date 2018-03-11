@@ -7,6 +7,7 @@
 #include <string>
 #include <cstring>
 #include "db_interface.h"
+
 namespace bitmile{
 namespace msg {
 
@@ -15,6 +16,8 @@ namespace msg {
   enum MessageType {
     KEYWORD_QUERY,
     KEYWORD_QUERY_REPLY,
+    UPLOAD_DOC,
+    UPLOAD_DOC_REPLY,
     BLANK,
     ERROR,
   };
@@ -32,7 +35,7 @@ namespace msg {
 
   class KeywordQueryMes : public Message {
   public:
-    KeywordQueryMes(MessageType type, char* dat, size_t size);
+    KeywordQueryMes(MessageType type, const char* dat, size_t size);
     void Serialize (std::vector<char>& return_data);
 
     std::vector<std::string> GetKeywords();
@@ -45,7 +48,7 @@ namespace msg {
 
   class KeywordQueryReplyMes : public Message {
   public:
-    KeywordQueryReplyMes(MessageType type, char* dat, size_t size);
+    KeywordQueryReplyMes(MessageType type, const char* dat, size_t size);
     void Serialize (std::vector<char>& return_data);
     void SetDocuments (std::vector<db::Document>& input_doc);
     std::vector <db::Document> GetDocs ();
@@ -54,9 +57,30 @@ namespace msg {
     std::vector<db::Document> docs_;
   };
 
+  class UploadDocMes : public Message {
+  public:
+    UploadDocMes (MessageType type, const char* dat, size_t size);
+    void Serialize (std::vector<char>& return_data);
+
+    const db::Document& GetDoc ();
+  protected:
+    void Deserialize (const char* dat, size_t size);
+    db::Document doc_;
+  };
+
+  class UploadDocReplyMes : public Message {
+  public:
+    UploadDocReplyMes (MessageType type, const char* dat, size_t size);
+    void Serialize (std::vector<char>& return_data);
+  protected:
+    void Deserialize (const char* dat, size_t size);
+    int result_code_;
+    std::string message_;
+  };
+
   class ErrorMes : public Message {
   public:
-    ErrorMes (MessageType type, char* dat, size_t size);
+    ErrorMes (MessageType type, const char* dat, size_t size);
     void Serialize (std::vector<char>& return_data);
   protected:
     void Deserialize (const char* dat, size_t size);
@@ -66,7 +90,7 @@ namespace msg {
 
   class BlankMes : public Message {
   public:
-    BlankMes (MessageType type, char* dat, size_t size);
+    BlankMes (MessageType type, const char* dat, size_t size);
     void Serialize (std::vector<char>& return_data);
   protected:
     void Deserialize (const char* dat, size_t size) {}
@@ -74,7 +98,7 @@ namespace msg {
 
   class MessageFactory {
   public:
-    Message* CreateMessage (MessageType type, char* dat, size_t size);
+    Message* CreateMessage (MessageType type, const char* dat, size_t size);
 
   protected:
     void Deserialize (const char* dat, size_t size);

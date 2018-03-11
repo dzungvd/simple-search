@@ -3,7 +3,7 @@
 
 namespace bitmile{
   namespace db{
-    nlohmann::json Document::ToJson () {
+    nlohmann::json Document::ToJson () const {
       nlohmann::json json_doc;
       json_doc["owner_address"] = owner_address_;
       json_doc["doc_id"] = doc_id_;
@@ -18,7 +18,7 @@ namespace bitmile{
           //compiler complain it can't convert from char* to const unsigned char* so create a temporary space then copy the data to this space
 
           sodium_bin2base64 (b64_str, b64_len,
-                             reinterpret_cast<unsigned char*> (data_.data()), data_.size(),
+                             reinterpret_cast<const unsigned char*> (data_.data()), data_.size(),
                              sodium_base64_VARIANT_ORIGINAL);
 
           json_doc["data"] = b64_str;
@@ -28,6 +28,9 @@ namespace bitmile{
         }
       }
 
+      if (keywords_.size() > 0) {
+        json_doc["keywords"] = keywords_;
+      }
       return json_doc;
 
     }
@@ -49,7 +52,7 @@ namespace bitmile{
       }
 
       if (doc.find ("data") != doc.end()) {
-        if (doc.count ("data_size") != 1) {
+        if (doc.count ("data_size") != 1 || doc.count("keywords") != 1) {
           return false;
         }
         //get base 64 string
@@ -62,27 +65,33 @@ namespace bitmile{
                            NULL, &decode_bin_size,
                                NULL, sodium_base64_VARIANT_ORIGINAL)) {
           //failed to decode string
+          data_ = std::vector<char> ();
           return false;
         }
 
         if (decode_bin_size != bin_size) {
           //binary size get from client should match
           //decoded size
+          data_ = std::vector<char> ();
           return false;
+        }
+
+        for (auto& word : doc["keywords"]) {
+          keywords_.push_back (word.dump());
         }
       }
 
       return true;
     }
 
-    std::string Document::GetOwnerAddress () {
+    std::string Document::GetOwnerAddress () const{
       return owner_address_;
     }
     void Document::SetOwnerAddress (std::string addr) {
       owner_address_ = addr;
     }
 
-    std::string Document::GetOwnerDocId() {
+    std::string Document::GetOwnerDocId() const {
       return doc_id_;
     }
 
@@ -90,7 +99,7 @@ namespace bitmile{
       doc_id_ = id;
     }
 
-    std::string Document::GetElasticDocId() {
+    std::string Document::GetElasticDocId() const{
       return elastic_doc_id_;
     }
 
@@ -153,8 +162,16 @@ namespace bitmile{
       memcpy (data_.data(), dat, size);
     }
 
-    const std::vector<char>& Document::GetData() {
+    const std::vector<char>& Document::GetData() const{
       return data_;
+    }
+
+    void Document::SetKeywords (std::vector<std::string>& keywords) {
+      keywords_ = keywords;
+    }
+
+    const std::vector<std::string>& Document::GetKeywords() const{
+      return keywords_;
     }
 
     DbInterface::DbInterface() {

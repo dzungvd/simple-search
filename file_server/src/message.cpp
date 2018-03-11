@@ -3,7 +3,7 @@
 namespace bitmile {
   namespace msg {
 
-    KeywordQueryMes::KeywordQueryMes (MessageType type, char* dat, size_t size) {
+    KeywordQueryMes::KeywordQueryMes (MessageType type, const char* dat, size_t size) {
       type_ = type;
       Deserialize (dat, size);
     }
@@ -77,7 +77,7 @@ namespace bitmile {
     std::vector<std::string> KeywordQueryMes::GetKeywords() {
       return keywords_;
     }
-    KeywordQueryReplyMes::KeywordQueryReplyMes (MessageType type, char* dat, size_t size) {
+    KeywordQueryReplyMes::KeywordQueryReplyMes (MessageType type, const char* dat, size_t size) {
       type_ = type;
       Deserialize (dat, size);
     }
@@ -175,10 +175,107 @@ namespace bitmile {
     std::vector<db::Document> KeywordQueryReplyMes::GetDocs () {
       return docs_;
     }
-    ErrorMes::ErrorMes (MessageType type, char* dat, size_t size){
+
+    UploadDocMes::UploadDocMes (MessageType type, const char* dat, size_t size) {
       type_ = type;
       Deserialize (dat, size);
     }
+
+    void UploadDocMes::Serialize (std::vector<char>& return_data) {
+      nlohmann::json json_body = doc_.ToJson();
+      std::string json_body_str = json_body.dump();
+
+      //add extra byte for teminate NULL byte
+      return_data.reserve (sizeof (MessageType) + json_body_str.length() + 1);
+      size_t offset = 0;
+      return_data.resize (sizeof (MessageType));
+      memcpy (return_data.data(), &type_, sizeof (MessageType));
+      offset += sizeof (MessageType);
+      if (json_body_str.length() > 0) {
+        return_data.resize ( return_data.size() + json_body_str.length() + 1);
+        memcpy (return_data.data() + offset, json_body_str.c_str(), json_body_str.length() + 1);
+      }
+
+    }
+
+    void UploadDocMes::Deserialize (const char* dat, size_t size) {
+
+      //json body should have length > 1
+      if (size <= 1) {
+        return;
+      }
+
+      //last byte should be terminate byte
+      if (dat[size - 1] != '\0')  {
+        return;
+      }
+
+      std::string json_body (dat);
+      nlohmann::json json_parsed = nlohmann::json::parse (json_body);
+
+      doc_.FromJson (json_parsed);
+
+    }
+
+    const db::Document& UploadDocMes::GetDoc () {
+      return doc_;
+    }
+
+    UploadDocReplyMes::UploadDocReplyMes (MessageType type, const char* dat, size_t size) {
+      type_ = type;
+      Deserialize (dat, size);
+    }
+
+    void UploadDocReplyMes::Serialize (std::vector<char>& return_data) {
+      /*
+       * message:
+       * -------------------
+       *|result| message   |
+       *-------------------
+       * result: int type (4 bytes)
+       * message: string type
+       */
+
+      return_data.reserve (sizeof (MessageType) + sizeof (int) + message_.length() + 1);
+      return_data.resize (sizeof (MessageType));
+
+      memcpy (return_data.data(), &type_, sizeof (MessageType));
+
+      int offset = sizeof(MessageType);
+
+      return_data.resize (sizeof (MessageType) + sizeof (int));
+
+      memcpy (return_data.data() + offset, &result_code_, sizeof (int));
+
+      offset += sizeof (int);
+
+      if (message_.length() > 0) {
+        return_data.resize (message_.length() + 1);
+        memcpy (return_data.data() + offset, message_.c_str(), message_.length() + 1);
+      }
+
+    }
+
+    void UploadDocReplyMes::Deserialize (const char* dat, size_t size) {
+
+      if (size < sizeof (int))  {
+        return;
+      }
+
+      memcpy (&result_code_, dat, sizeof(int));
+      int offset = sizeof (int);
+
+      if (size > offset) {
+        message_ = std::string (dat+ offset);
+      }
+    }
+
+    ErrorMes::ErrorMes (MessageType type, const char* dat, size_t size){
+      type_ = type;
+      Deserialize (dat, size);
+    }
+
+
 
     void ErrorMes::Deserialize (const char* dat, size_t size) {
       return;
@@ -190,7 +287,7 @@ namespace bitmile {
     }
 
 
-    BlankMes::BlankMes (MessageType type, char* dat, size_t size) {
+    BlankMes::BlankMes (MessageType type, const char* dat, size_t size) {
       type = type;
       Deserialize(dat, size);
     }
@@ -200,13 +297,17 @@ namespace bitmile {
       memcpy (return_data.data(), &type_, sizeof (MessageType));
     }
 
-    Message* MessageFactory::CreateMessage (MessageType type, char* dat, size_t size) {
+    Message* MessageFactory::CreateMessage (MessageType type, const char* dat, size_t size) {
 
       switch (type) {
       case MessageType::KEYWORD_QUERY:
         return new KeywordQueryMes (type, dat, size);
       case MessageType::KEYWORD_QUERY_REPLY:
         return new KeywordQueryReplyMes (type, dat, size);
+      case MessageType::UPLOAD_DOC:
+        return new UploadDocMes (type, dat, size);
+      case MessageType::UPLOAD_DOC_REPLY:
+        return new UploadDocReplyMes (type, dat, size);
       case MessageType::BLANK:
         return new BlankMes (type, dat, size);
 

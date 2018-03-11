@@ -11,6 +11,7 @@ namespace bitmile{
     msg::Message* Handle (msg::Message* mes);
 
     msg::Message* HandleKeywordQuery (msg::Message* query);
+    msg::Message* HandleUploadDoc (msg::Message* upload_mes);
   private:
     /*!< database interface */
     db::DbInterface db_;
