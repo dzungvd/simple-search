@@ -3,6 +3,9 @@
 
 #include "message.h"
 #include "db_interface.h"
+#include <boost/filesystem.hpp>
+#include <fstream>
+
 namespace bitmile{
   class MessageHandler {
   public:

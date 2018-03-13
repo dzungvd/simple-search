@@ -29,18 +29,18 @@ namespace bitmile{
 
       bool ParseJson (Json::Object json_doc);
       std::string GetOwnerAddress() const;
-      void SetOwnerAddress(std::string addr);
+      void SetOwnerAddress(const std::string& addr);
 
       std::string GetOwnerDocId() const;
-      void SetOwnerDocId (std::string docId);
+      void SetOwnerDocId (const std::string& docId);
 
       std::string GetElasticDocId() const;
-      void SetElasticDocId(std::string id);
+      void SetElasticDocId(const std::string& id);
 
       void SetData (const char* dat, const size_t size);
       const std::vector<char>& GetData () const;
 
-      void SetKeywords (std::vector<std::string>& keywords);
+      void SetKeywords (const std::vector<std::string>& keywords);
       const std::vector<std::string>& GetKeywords() const;
 
     };
@@ -53,7 +53,7 @@ namespace bitmile{
 
       void QueryDocWithId (const std::vector<int> id_list, std::vector<Document>& result);
 
-      bool insertDoc (const Document& doc);
+      std::string InsertDoc (const Document& doc);
     private:
       std::string index_;
       std::string type_;

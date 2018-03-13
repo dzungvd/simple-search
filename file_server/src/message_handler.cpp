@@ -65,12 +65,43 @@ namespace bitmile {
     }
 
     //put owner_address, doc_id, keywords to elastic db
+    db::Document elastic_doc;
+    elastic_doc.SetOwnerAddress (doc.GetOwnerAddress());
+    elastic_doc.SetOwnerDocId (doc.GetOwnerDocId ());
+    elastic_doc.SetKeywords (doc.GetKeywords());
 
-    //save data to file
+    std::string elastic_doc_id = db_.InsertDoc (elastic_doc);
+    msg::Message* reply;
 
-    int code = 200;
-    msg::Message* reply = mes_factory_.CreateMessage (msg::MessageType::UPLOAD_DOC_REPLY, (char*)&code, (size_t)(sizeof (int)));
+    if (elastic_doc_id.length() > 0) {
+      //save data to file
 
+      //check and create folder if not exist
+      std::string path = boost::filesystem::current_path().string() + std::string("/data");
+
+      boost::filesystem::path dir (path);
+
+      boost::system::error_code ec;
+
+      boost::filesystem::create_directory (dir);
+
+      //get file name from elastic id
+      std::string file_path_str = path + std::string("/") + elastic_doc_id;
+      boost::filesystem::path file_path (file_path_str);
+
+
+      std::ofstream fout (file_path_str, std::ios::out | std::ios::binary );
+      fout.write (doc.GetData().data(), doc.GetData().size());
+      fout.close();
+
+      int code = 200;
+      reply = mes_factory_.CreateMessage (msg::MessageType::UPLOAD_DOC_REPLY, (char*)&code, (size_t)(sizeof (int)));
+      return reply;
+    }
+
+
+    //error
+    reply = mes_factory_.CreateMessage (msg::MessageType::ERROR, NULL, 0);
     return reply;
   }
 }//namespace bitmile

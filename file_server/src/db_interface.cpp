@@ -5,9 +5,16 @@ namespace bitmile{
   namespace db{
     nlohmann::json Document::ToJson () const {
       nlohmann::json json_doc;
-      json_doc["owner_address"] = owner_address_;
-      json_doc["doc_id"] = doc_id_;
-      json_doc["elastic_doc_id"] = elastic_doc_id_;
+      if (owner_address_.length() > 0) {
+        json_doc["owner_address"] = owner_address_;
+      }
+      if (doc_id_.length() > 0) {
+        json_doc["doc_id"] = doc_id_;
+      }
+
+      if (elastic_doc_id_.length() > 0) {
+        json_doc["elastic_doc_id"] = elastic_doc_id_;
+      }
 
       if (data_.size() > 0) {
         //convert data to base64 form before pass it to json doc
@@ -36,18 +43,16 @@ namespace bitmile{
     }
 
     bool Document::FromJson (nlohmann::json& doc) {
-      if (doc.count ("owner_address") != 1 ||
-          doc.count ("doc_id") != 1 ||
-          doc.count ("elastic_doc_id") > 1 ||
-          doc.count ("data") > 1) {
-        //invalid message
-        return false;
+
+      if (doc.count ("owner_address") == 1){
+        owner_address_ = doc["owner_address"];
       }
 
-      owner_address_ = doc["owner_address"];
-      doc_id_ = doc["doc_id"];
+      if (doc.count ("doc_id") == 1) {
+        doc_id_ = doc["doc_id"];
+      }
 
-      if (doc.find ("elastic_doc_id") != doc.end()) {
+      if (doc.count ("elastic_doc_id") == 1) {
         elastic_doc_id_ = doc["elastic_doc_id"];
       }
 
@@ -87,7 +92,7 @@ namespace bitmile{
     std::string Document::GetOwnerAddress () const{
       return owner_address_;
     }
-    void Document::SetOwnerAddress (std::string addr) {
+    void Document::SetOwnerAddress (const std::string& addr) {
       owner_address_ = addr;
     }
 
@@ -95,7 +100,7 @@ namespace bitmile{
       return doc_id_;
     }
 
-    void Document::SetOwnerDocId (std::string id) {
+    void Document::SetOwnerDocId (const std::string& id) {
       doc_id_ = id;
     }
 
@@ -103,7 +108,7 @@ namespace bitmile{
       return elastic_doc_id_;
     }
 
-    void Document::SetElasticDocId (std::string id) {
+    void Document::SetElasticDocId (const std::string& id) {
       elastic_doc_id_ = id;
     }
     bool Document::ParseJson (Json::Object json_doc) {
@@ -166,7 +171,7 @@ namespace bitmile{
       return data_;
     }
 
-    void Document::SetKeywords (std::vector<std::string>& keywords) {
+    void Document::SetKeywords (const std::vector<std::string>& keywords) {
       keywords_ = keywords;
     }
 
@@ -278,6 +283,21 @@ namespace bitmile{
       }
     }
 
+    std::string DbInterface::InsertDoc (const Document& doc) {
+      std::string json_str = doc.ToJson().dump();
+
+      Json::Object json_obj;
+      json_obj.addMember (json_str.c_str(), json_str.c_str() + json_str.length());
+
+      std::string result;
+      try {
+        result = elastic_search_->index (index_, type_, json_obj);
+      }catch (Exception& e) {
+        std::cerr << "failed in DbInterface::InsertDoc. Exception cauth: " << e.what() << std::endl;
+      }
+
+      return result;
+    }
     void DbInterface::QueryDocWithId (const std::vector<int> id_list, std::vector<Document>& result) {
 
     }

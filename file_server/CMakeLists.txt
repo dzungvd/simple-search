@@ -63,4 +63,10 @@ find_package (sodium REQUIRED)
 target_include_directories(${PROJ_NAME} PUBLIC ${sodium_INCLUDE_DIR})
 target_link_libraries(${PROJ_NAME} PUBLIC ${sodium_LIBRARY_RELEASE})
 
+#use boost lib
+find_package(Boost COMPONENTS system filesystem REQUIRED)
+set(Boost_USE_STATIC_LIBS        ON)  # only find static libs
+target_link_libraries (${PROJ_NAME} PUBLIC ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+
+
 add_subdirectory(tools)
