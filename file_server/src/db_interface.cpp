@@ -287,15 +287,24 @@ namespace bitmile{
       std::string json_str = doc.ToJson().dump();
 
       Json::Object json_obj;
-      json_obj.addMember (json_str.c_str(), json_str.c_str() + json_str.length());
 
-      std::string result;
+      bool flag = true;
+
       try {
-        result = elastic_search_->index (index_, type_, json_obj);
-      }catch (Exception& e) {
-        std::cerr << "failed in DbInterface::InsertDoc. Exception cauth: " << e.what() << std::endl;
+        json_obj.addMember (json_str.c_str(), json_str.c_str() + json_str.length());
+      }catch (std::logic_error& e) {
+        std::cerr << "failed to convert to json_obj: " << json_str << std::endl;
+        flag = false;
       }
 
+      std::string result;
+      if (flag) {
+        try {
+          result = elastic_search_->index (index_, type_, json_obj);
+        }catch (Exception& e) {
+          std::cerr << "failed in DbInterface::InsertDoc. Exception cauth: " << e.what() << std::endl;
+        }
+      }
       return result;
     }
     void DbInterface::QueryDocWithId (const std::vector<int> id_list, std::vector<Document>& result) {
