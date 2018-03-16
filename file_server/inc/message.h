@@ -18,9 +18,11 @@ namespace msg {
     KEYWORD_QUERY_REPLY,
     UPLOAD_DOC,
     UPLOAD_DOC_REPLY,
+    DOC_QUERY,
+    DOC_QUERY_REPLY,
     BLANK,
     ERROR,
-  };
+   };
 
   class Message {
 
@@ -74,8 +76,28 @@ namespace msg {
     void Serialize (std::vector<char>& return_data);
   protected:
     void Deserialize (const char* dat, size_t size);
-    int result_code_;
-    std::string message_;
+    int result_;
+    std::string elastic_id_;
+  };
+
+  class DocQueryMes : public Message {
+  public:
+    DocQueryMes (MessageType type, const char* dat, size_t size);
+    void Serialize (std::vector<char>& return_data);
+    std::string GetElasticId();
+  protected:
+    void Deserialize (const char* data, size_t size);
+    std::string elastic_id_;
+  };
+
+  class DocQueryReplyMes : public Message {
+  public:
+    DocQueryReplyMes (MessageType type, const char* dat, size_t size);
+    void Serialize (std::vector<char>& return_data);
+    void SetDoc (const db::Document& document );
+  protected:
+    void Deserialize (const char* data, size_t size);
+    db::Document doc_;
   };
 
   class ErrorMes : public Message {

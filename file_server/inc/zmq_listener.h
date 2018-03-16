@@ -2,6 +2,7 @@
 #define _ZMQ_LISTENER_H
 
 #include <zmq.hpp>
+
 #include <pthread.h>
 #include <assert.h>
 #include "message.h"

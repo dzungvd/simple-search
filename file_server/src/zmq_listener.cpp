@@ -51,6 +51,7 @@ namespace bitmile {
       msg::Message* mes;
 
       if (request.size() >= sizeof (msg::MessageType)) {
+
         //get message type first
         msg::MessageType type;
         memcpy (&type, (char*)request.data(), sizeof (msg::MessageType));
@@ -59,6 +60,7 @@ namespace bitmile {
         mes = mes_factory_.CreateMessage(type, (char*)request.data() + sizeof (msg::MessageType), request.size() - sizeof (msg::MessageType));
 
       }else {
+
         //error - can't parse message type
         mes = mes_factory_.CreateMessage(msg::MessageType::ERROR, NULL, 0);
       }
@@ -90,6 +92,7 @@ namespace bitmile {
   }
 
   void *ZmqListener::InitConnection(void *arg) {
+
 
     //TODO: change port to dynamic
     //start accepting connection from clients

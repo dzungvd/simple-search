@@ -12,6 +12,8 @@ namespace bitmile {
     case msg::UPLOAD_DOC:
       reply = HandleUploadDoc (mes);
       break;
+    case msg::DOC_QUERY:
+      reply = HandleDocQuery (mes);
     case msg::BLANK:
       reply = mes_factory_.CreateMessage (msg::MessageType::BLANK, NULL, 0);
       break;
@@ -48,9 +50,14 @@ namespace bitmile {
   }
 
   msg::Message* MessageHandler::HandleUploadDoc (msg::Message* mes) {
+
     msg::UploadDocMes* upload_doc_mes = static_cast<msg::UploadDocMes*> (mes);
 
+
     const db::Document& doc = upload_doc_mes->GetDoc();
+
+    //check if it is a valid document or not
+
 
     //document must contain data, owner address, keywords and id
 
@@ -69,6 +76,7 @@ namespace bitmile {
     elastic_doc.SetOwnerAddress (doc.GetOwnerAddress());
     elastic_doc.SetOwnerDocId (doc.GetOwnerDocId ());
     elastic_doc.SetKeywords (doc.GetKeywords());
+
 
     std::string elastic_doc_id = db_.InsertDoc (elastic_doc);
     msg::Message* reply;
@@ -95,13 +103,57 @@ namespace bitmile {
       fout.close();
 
       int code = 200;
-      reply = mes_factory_.CreateMessage (msg::MessageType::UPLOAD_DOC_REPLY, (char*)&code, (size_t)(sizeof (int)));
+      nlohmann::json reply_json;
+      reply_json ["result"] = code;
+      reply_json ["elastic_id"] = elastic_doc_id;
+      std::string reply_json_str = reply_json.dump();
+
+      reply = mes_factory_.CreateMessage (msg::MessageType::UPLOAD_DOC_REPLY, reply_json_str.c_str(), reply_json_str.length() + 1);
+
       return reply;
     }
 
 
     //error
     reply = mes_factory_.CreateMessage (msg::MessageType::ERROR, NULL, 0);
+    return reply;
+  }
+
+  msg::Message* MessageHandler::HandleDocQuery (msg::Message* doc_query_mes) {
+    msg::DocQueryMes* query_mes = static_cast<msg::DocQueryMes*> (doc_query_mes);
+
+    std::string elastic_id = query_mes->GetElasticId ();
+    std::string file_path = boost::filesystem::current_path().string() + std::string("/data/") + elastic_id;
+
+    msg::Message* reply;
+
+    //get doc from elastic id
+    std::ifstream fin (file_path, std::ifstream::binary);
+    if (fin.fail()) {
+      //something wrong happened, return ERROR message
+      reply = mes_factory_.CreateMessage(msg::MessageType::ERROR, NULL, 0);
+      return reply;
+    }
+
+
+    fin.seekg (0, fin.end);
+    int length = fin.tellg();
+    fin.seekg (0, fin.beg);
+
+    std::vector<char> query_file;
+    query_file.resize (length);
+
+    fin.read (query_file.data(), length);
+
+    db::Document result_doc;
+    result_doc.SetData(query_file.data(), query_file.size());
+
+    std::string json_str = result_doc.ToJson();
+
+
+    reply = mes_factory_.CreateMessage(msg::MessageType::DOC_QUERY_REPLY, json_str.c_str(), json_str.length() + 1);
+
+    fin.close();
     return reply;
   }
 }//namespace bitmile

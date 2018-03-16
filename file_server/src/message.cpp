@@ -230,45 +230,140 @@ namespace bitmile {
       /*
        * message:
        * -------------------
-       *|result| message   |
+       *|result| json_body |
        *-------------------
        * result: int type (4 bytes)
-       * message: string type
+       * json_body: string type
+       * {
+       *   "result" : 0
+       *   "elastic_id" : "elastic id here"
+       * }
+       * result contain result code
+       *       0 - error
+       * elastic_id contain identification of document in elastic database
+       *
        */
 
-      return_data.reserve (sizeof (MessageType) + sizeof (int) + message_.length() + 1);
-      return_data.resize (sizeof (MessageType));
+      nlohmann::json reply_json;
+
+      reply_json["result"] = result_;
+      if (elastic_id_.length() > 0) {
+        reply_json["elastic_id"] = elastic_id_;
+      }
+      std::string reply_body = reply_json.dump();
+
+      return_data.resize (sizeof (MessageType) + reply_body.length() + 1);
 
       memcpy (return_data.data(), &type_, sizeof (MessageType));
 
       int offset = sizeof(MessageType);
 
-      return_data.resize (sizeof (MessageType) + sizeof (int));
-
-      memcpy (return_data.data() + offset, &result_code_, sizeof (int));
-
-      offset += sizeof (int);
-
-      if (message_.length() > 0) {
-        return_data.resize (message_.length() + 1);
-        memcpy (return_data.data() + offset, message_.c_str(), message_.length() + 1);
-      }
+      memcpy (return_data.data() + offset, reply_body.c_str(), reply_body.length() + 1);
 
     }
 
     void UploadDocReplyMes::Deserialize (const char* dat, size_t size) {
 
-      if (size < sizeof (int))  {
+      if (size < 1 || dat[size - 1] != '\0') {
         return;
       }
 
-      memcpy (&result_code_, dat, sizeof(int));
-      int offset = sizeof (int);
+      std::string message = std::string (dat);
 
-      if (size > offset) {
-        message_ = std::string (dat+ offset);
+      nlohmann::json parse_json = nlohmann::json::parse (message);
+
+      if (parse_json.count ("result") != 1 ||
+          parse_json.count ("elastic_id") !=1 ) {
+        result_ = 0;
+        return;
+      }
+
+      result_ = parse_json["result"];
+      elastic_id_ = parse_json["elastic_id"];
+
+    }
+
+    DocQueryMes::DocQueryMes (MessageType type, const char* dat, size_t size) {
+      type_ = type;
+      Deserialize (dat, size);
+    }
+
+    void DocQueryMes::Serialize (std::vector<char>& return_data) {
+      nlohmann::json json_body;
+      if (elastic_id_.length() > 0) {
+        json_body["elastic_id"] = elastic_id_;
+      }
+      std::string json_str = json_body.dump();
+
+      return_data.reserve (sizeof (MessageType) + json_str.length() + 1);
+
+      int offset = 0;
+
+      return_data.resize (sizeof (MessageType));
+
+      memcpy (return_data.data(), &type_, sizeof (MessageType));
+      offset += sizeof (MessageType);
+
+      if (json_str.length() > 0) {
+        return_data.resize (sizeof (MessageType) + json_str.length() + 1);
+        memcpy (return_data.data() + offset, json_str.c_str(), json_str.length() + 1);
+        offset += json_str.length() + 1;
       }
     }
+
+    void DocQueryMes::Deserialize (const char* dat, size_t size) {
+      if (dat == NULL || size == 0) return;
+
+      if (dat[size - 1] != '\0') {
+        return;
+      }
+
+      nlohmann::json json_str = nlohmann::json::parse(std::string (dat));
+      if (json_str.count ("elastic_id") == 1) {
+        elastic_id_ = json_str["elastic_id"];
+      }
+    }
+
+    std::string DocQueryMes::GetElasticId () {
+      return elastic_id_;
+    }
+    DocQueryReplyMes::DocQueryReplyMes (MessageType type, const char* dat, size_t size) {
+      type_ = type;
+      Deserialize (dat, size);
+    }
+
+    void DocQueryReplyMes::Serialize (std::vector<char>& return_data) {
+      std::string json_str = doc_.ToJson().dump();
+
+      return_data.reserve (sizeof (MessageType) + json_str.length() + 1);
+
+      int offset = 0;
+      return_data.resize (sizeof(MessageType));
+      memcpy (return_data.data(), &type_, sizeof (MessageType));
+      offset += sizeof (MessageType);
+
+      if (json_str.length() > 0) {
+        return_data.resize (sizeof (MessageType) + json_str.length() + 1);
+        memcpy (return_data.data() + offset, json_str.c_str(), json_str.length() + 1);
+        offset += json_str.length() + 1;
+      }
+
+    }
+
+    void DocQueryReplyMes::Deserialize (const char* data, size_t size) {
+      if (data == NULL || size == 0) return;
+
+      if (data[size - 1] != '\0') return;
+
+      nlohmann::json json_str = nlohmann::json::parse (std::string(data));
+
+      doc_.FromJson(json_str);
+    }
+
+    void DocQueryReplyMes::SetDoc (const db::Document& document) {
+      doc_ = document;
+    }
+
 
     ErrorMes::ErrorMes (MessageType type, const char* dat, size_t size){
       type_ = type;
@@ -308,9 +403,12 @@ namespace bitmile {
         return new UploadDocMes (type, dat, size);
       case MessageType::UPLOAD_DOC_REPLY:
         return new UploadDocReplyMes (type, dat, size);
+      case MessageType::DOC_QUERY:
+        return new DocQueryMes (type, dat, size);
       case MessageType::BLANK:
         return new BlankMes (type, dat, size);
-
+      case MessageType::DOC_QUERY_REPLY:
+        return new DocQueryReplyMes (type, dat, size);
       default:
         return new ErrorMes (MessageType::ERROR, dat, size);
       }
