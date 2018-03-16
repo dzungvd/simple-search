@@ -24,6 +24,14 @@ namespace bitmile{
       std::vector<std::string> keywords_;
 
     public:
+      Document operator = (const Document& doc) {
+        owner_address_ = doc.GetOwnerAddress();
+        doc_id_ = doc.GetOwnerDocId();
+        elastic_doc_id_ = doc.GetElasticDocId();
+        data_ = doc.GetData();
+        keywords_ = doc.GetKeywords();
+      }
+
       nlohmann::json ToJson () const;
       bool FromJson (nlohmann::json& doc);
 
