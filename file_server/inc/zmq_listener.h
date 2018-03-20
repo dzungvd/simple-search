@@ -2,9 +2,10 @@
 #define _ZMQ_LISTENER_H
 
 #include <zmq.hpp>
-
+#include "zhelpers.hpp"
 #include <pthread.h>
 #include <assert.h>
+#include <queue>
 #include "message.h"
 #include "message_handler.h"
 
@@ -53,6 +54,8 @@ namespace bitmile {
     void *WorkerRoutine (void* arg);
 
     static void *StartWorkerRoutine (void * arg);
+
+    static void ClientBalancingMsgBroker (zmq::socket_t& frontend, zmq::socket_t& backend, int worker_num);
 
     zmq::context_t *context_; /*!< global context for zmq - allow only one context for each class*/
     zmq::socket_t *clients_socket_; /*!< socket for clients */
