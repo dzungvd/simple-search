@@ -186,14 +186,11 @@ namespace bitmile {
       std::string json_body_str = json_body.dump();
 
       //add extra byte for teminate NULL byte
-      return_data.reserve (sizeof (MessageType) + json_body_str.length() + 1);
-      size_t offset = 0;
-      return_data.resize (sizeof (MessageType));
-      memcpy (return_data.data(), &type_, sizeof (MessageType));
-      offset += sizeof (MessageType);
+      return_data.reserve (json_body_str.length() + 1);
+
       if (json_body_str.length() > 0) {
-        return_data.resize ( return_data.size() + json_body_str.length() + 1);
-        memcpy (return_data.data() + offset, json_body_str.c_str(), json_body_str.length() + 1);
+        return_data.resize (json_body_str.length() + 1);
+        memcpy (return_data.data(), json_body_str.c_str(), json_body_str.length() + 1);
       }
 
     }
@@ -205,12 +202,7 @@ namespace bitmile {
         return;
       }
 
-      //last byte should be terminate byte
-      if (dat[size - 1] != '\0')  {
-        return;
-      }
-
-      std::string json_body (dat);
+      std::string json_body (dat, size);
       nlohmann::json json_parsed = nlohmann::json::parse (json_body);
 
       doc_.FromJson (json_parsed);
@@ -252,13 +244,9 @@ namespace bitmile {
       }
       std::string reply_body = reply_json.dump();
 
-      return_data.resize (sizeof (MessageType) + reply_body.length() + 1);
+      return_data.resize (reply_body.length() + 1);
 
-      memcpy (return_data.data(), &type_, sizeof (MessageType));
-
-      int offset = sizeof(MessageType);
-
-      memcpy (return_data.data() + offset, reply_body.c_str(), reply_body.length() + 1);
+      memcpy (return_data.data(), reply_body.c_str(), reply_body.length() + 1);
 
     }
 
@@ -295,19 +283,11 @@ namespace bitmile {
       }
       std::string json_str = json_body.dump();
 
-      return_data.reserve (sizeof (MessageType) + json_str.length() + 1);
-
-      int offset = 0;
-
-      return_data.resize (sizeof (MessageType));
-
-      memcpy (return_data.data(), &type_, sizeof (MessageType));
-      offset += sizeof (MessageType);
+      return_data.reserve (json_str.length() + 1);
 
       if (json_str.length() > 0) {
-        return_data.resize (sizeof (MessageType) + json_str.length() + 1);
-        memcpy (return_data.data() + offset, json_str.c_str(), json_str.length() + 1);
-        offset += json_str.length() + 1;
+        return_data.resize (json_str.length() + 1);
+        memcpy (return_data.data(), json_str.c_str(), json_str.length() + 1);
       }
     }
 
@@ -335,17 +315,11 @@ namespace bitmile {
     void DocQueryReplyMes::Serialize (std::vector<char>& return_data) {
       std::string json_str = doc_.ToJson().dump();
 
-      return_data.reserve (sizeof (MessageType) + json_str.length() + 1);
-
-      int offset = 0;
-      return_data.resize (sizeof(MessageType));
-      memcpy (return_data.data(), &type_, sizeof (MessageType));
-      offset += sizeof (MessageType);
+      return_data.reserve (json_str.length() + 1);
 
       if (json_str.length() > 0) {
-        return_data.resize (sizeof (MessageType) + json_str.length() + 1);
-        memcpy (return_data.data() + offset, json_str.c_str(), json_str.length() + 1);
-        offset += json_str.length() + 1;
+        return_data.resize (json_str.length() + 1);
+        memcpy (return_data.data(), json_str.c_str(), json_str.length() + 1);
       }
 
     }
@@ -365,6 +339,14 @@ namespace bitmile {
     }
 
 
+    SetEncryptKeyMes::SetEncryptKeyMes (MessageType type, const char* dat, size_t size) {
+      type_ = type;
+      Deserialize (dat, size);
+    }
+
+    void SetEncryptKeyMes::Deserialize (const char* dat, size_t size) {
+    }
+
     ErrorMes::ErrorMes (MessageType type, const char* dat, size_t size){
       type_ = type;
       Deserialize (dat, size);
@@ -377,8 +359,6 @@ namespace bitmile {
     }
 
     void ErrorMes::Serialize (std::vector<char>& return_data) {
-      return_data.resize (sizeof (MessageType));
-      memcpy (return_data.data(), &type_, sizeof (MessageType));
     }
 
 
@@ -388,8 +368,6 @@ namespace bitmile {
     }
 
     void BlankMes::Serialize (std::vector<char>& return_data) {
-      return_data.resize (sizeof (MessageType));
-      memcpy (return_data.data(), &type_, sizeof (MessageType));
     }
 
     Message* MessageFactory::CreateMessage (MessageType type, const char* dat, size_t size) {

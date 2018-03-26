@@ -2,7 +2,7 @@
 
 set(PROJ_NAME file_server)
 set(PROJ_INCLUDES "inc")
-set(PROJ_SOURCE "src/main.cpp" "src/zmq_listener.cpp" "src/message.cpp" "src/message_handler.cpp" "src/db_interface.cpp")
+set(PROJ_SOURCE "src/main.cpp" "src/zmq_listener.cpp" "src/message.cpp" "src/message_handler.cpp" "src/message_crypto.cpp" "src/db_interface.cpp" )
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/")
 message ("cmake module ${CMAKE_MODULE_PATH}")

@@ -79,6 +79,7 @@ namespace bitmile {
 
 
     std::string elastic_doc_id = db_.InsertDoc (elastic_doc);
+
     msg::Message* reply;
 
     if (elastic_doc_id.length() > 0) {
@@ -156,4 +157,5 @@ namespace bitmile {
     fin.close();
     return reply;
   }
+
 }//namespace bitmile

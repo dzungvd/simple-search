@@ -14,14 +14,16 @@ namespace msg {
   //message exchange between clients and servers
 
   enum MessageType {
+    BLANK,
+    ERROR,
     KEYWORD_QUERY,
     KEYWORD_QUERY_REPLY,
     UPLOAD_DOC,
     UPLOAD_DOC_REPLY,
     DOC_QUERY,
     DOC_QUERY_REPLY,
-    BLANK,
-    ERROR,
+    SET_ENCRYPT_KEY,
+    SET_ENCRYPT_KEY_REPLY
    };
 
   class Message {
@@ -98,6 +100,18 @@ namespace msg {
   protected:
     void Deserialize (const char* data, size_t size);
     db::Document doc_;
+  };
+
+  class SetEncryptKeyMes : public Message {
+  public:
+    SetEncryptKeyMes (MessageType type, const char* dat, size_t size);
+    void Serialize (std::vector<char>& return_data) {}
+  protected:
+    void Deserialize (const char* dat, size_t size);
+  };
+
+  class SetEncryptKeyReplyMes :public Message {
+
   };
 
   class ErrorMes : public Message {

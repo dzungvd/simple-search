@@ -8,7 +8,7 @@
 #include <queue>
 #include "message.h"
 #include "message_handler.h"
-
+#include "message_crypto.h"
 namespace bitmile {
 
   /*!

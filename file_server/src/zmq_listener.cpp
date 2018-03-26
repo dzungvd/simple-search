@@ -1,5 +1,5 @@
 #include "zmq_listener.h"
-
+#include <iostream>
 #define READY "READY"
 
 namespace bitmile {
@@ -48,6 +48,9 @@ namespace bitmile {
 
     s_send (socket, READY);
 
+    MessageCrypto msg_crypto;
+    std::map <std::string, std::pair <std::vector<char>, std::vector<char> > > client_key_map;
+
     while (1) {
       //receive three part message
       std::string client_id = s_recv (socket);
@@ -61,7 +64,9 @@ namespace bitmile {
       zmq::message_t request;
       socket.recv(&request);
 
-      msg::Message* mes;
+      //make zmq message and send it back to client
+      std::vector<char> ret_data;
+
 
       if (request.size() >= sizeof (msg::MessageType)) {
 
@@ -69,34 +74,75 @@ namespace bitmile {
         msg::MessageType type;
         memcpy (&type, (char*)request.data(), sizeof (msg::MessageType));
 
-        //parse raw data into specific message format
-        mes = mes_factory_.CreateMessage(type, (char*)request.data() + sizeof (msg::MessageType), request.size() - sizeof (msg::MessageType));
+        if (type == msg::SET_ENCRYPT_KEY) {
+          std::vector<char> key;
+          std::vector<char> nonce;
 
-      }else {
+          if (msg_crypto.DecryptSetKeyMsg ((char*) request.data() + sizeof (msg::MessageType), request.size() - sizeof (msg::MessageType), key, nonce)) {
+            client_key_map[client_id] = std::pair <std::vector<char>, std::vector<char> > (key, nonce);
 
-        //error - can't parse message type
-        mes = mes_factory_.CreateMessage(msg::MessageType::ERROR, NULL, 0);
+
+          }else {
+            //TODO: handle can't get secret key
+            //msg::Message* reply = mes_factory_.CreateMessage(msg::SET_ENCRYPT_KEY_REPLY, )
+          }
+
+
+        } else {
+
+          //decrypt data with saved secret key
+          if (client_key_map.find (client_id) != client_key_map.end()) {
+
+            std::vector<char> raw_data;
+
+            if (msg_crypto.DecryptMsgWithKey ((char*)request.data() + sizeof (msg::MessageType), request.size() - sizeof (msg::MessageType), client_key_map[client_id].first, client_key_map[client_id].second, raw_data)) {
+
+              //parse raw data into specific message format
+              msg::Message* mes = mes_factory_.CreateMessage(type, (char*)raw_data.data(), raw_data.size());
+
+              //handle message
+              msg::Message* ret_mes = msg_handler_->Handle (mes);
+
+              std::vector<char> ret_raw_dat;
+              ret_mes->Serialize (ret_raw_dat);
+
+              std::vector<char> ret_encrypt_dat;
+              //encrypt return data
+              msg_crypto.EncryptMsgWithKey (ret_raw_dat.data(), ret_raw_dat.size(), client_key_map[client_id].first, client_key_map[client_id].second, ret_encrypt_dat);
+
+              ret_data.resize (sizeof (msg::MessageType) + ret_encrypt_dat.size());
+              int type = ret_mes->Type();
+              memcpy (ret_data.data(), &type, sizeof (msg::MessageType));
+              if (ret_encrypt_dat.size() > 0) {
+                memcpy (ret_data.data() + sizeof(msg::MessageType), ret_encrypt_dat.data(), ret_encrypt_dat.size());
+              }
+
+              ret_raw_dat.resize(0);
+              msg_crypto.DecryptMsgWithKey (ret_encrypt_dat.data(), ret_encrypt_dat.size(), client_key_map[client_id].first, client_key_map[client_id].second, ret_raw_dat);
+
+              delete mes;
+              delete ret_mes;
+            }else{
+              //TODO: handle failed to decrypt data
+              std::cout << "failed to decrypt data" << std::endl;
+            }
+          }else{
+            //TODO: handle no secret key for client found
+            std::cout << "no secret key for client found" << std::endl;
+          }
+        }
       }
 
       //handle input message
-      msg::Message* ret_mes = msg_handler_->Handle (mes);
-
 
       //send back processed message to router
       //wrap it with client id
       s_sendmore (socket, client_id);
       s_sendmore (socket, "");
 
-      //make zmq message and send it back to client
-      std::vector<char> ret_data;
-      ret_mes->Serialize(ret_data);
-
       zmq::message_t reply (ret_data.size());
       memcpy ((void*) reply.data(), ret_data.data(), ret_data.size());
 
-      //free up memory from intermediate message
-      delete mes;
-      delete ret_mes;
 
       socket.send(reply);
     }
@@ -174,7 +220,6 @@ namespace bitmile {
         }
 
         std::string client_id = s_recv (backend);
-
         if (client_id.compare (READY) != 0) {
           {
             std::string empty = s_recv (backend);
@@ -216,6 +261,7 @@ namespace bitmile {
           //number of client per worker is equal
           worker_id = worker_queue[worker_turn];
           worker_turn = (worker_turn + 1) % worker_queue.size();
+          client_to_worker[client_id] = worker_id;
         }
         else {
           //if client already connected to server
