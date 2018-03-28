@@ -5,7 +5,9 @@ KeyManager::KeyManager()
 
 }
 
-bool KeyManager::getKey(std::string& file_path, std::string& passphrase, char** o_secret_key, char** o_public_key) {
+bool KeyManager::getKey(std::string& file_path, std::string& passphrase,
+                        char** o_secret_key, size_t& secret_key_len,
+                        char** o_public_key, size_t& public_key_len) {
 
     //read key file and convert it to json format
     std::ifstream key_file (file_path, std::ios::binary);
@@ -92,9 +94,11 @@ bool KeyManager::getKey(std::string& file_path, std::string& passphrase, char** 
 
     (*o_secret_key) = new char [decrypted_len];
     memcpy((*o_secret_key), decrypted, decrypted_len);
+    secret_key_len = decrypted_len;
 
     (*o_public_key) = new char [public_key.length()];
     memcpy((*o_public_key), public_key.c_str(), public_key.length());
+    public_key_len = public_key.length();
 
     return true;
 }
@@ -172,7 +176,7 @@ bool KeyManager::createKey(std::string& file_path, std::string& passphrase) {
     key_json["ciphertext"] = convertToBase64(ciphertext, sizeof ciphertext);
 
 
-    key_file << key_json.dump();
+    key_file << key_json.dump(4);
 
     return true;
 }
