@@ -26,15 +26,29 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-        keymanager.cpp
+        keymanager.cpp \
+    ../../message/message.cpp \
+    ../../database/db_interface.cpp \
+    ../../vendors/cpp-elasticsearch/src/elasticsearch/elasticsearch.cpp \
+    ../../vendors/cpp-elasticsearch/src/http/http.cpp \
+    ../../vendors/cpp-elasticsearch/src/json/json.cpp \
+    mainwindow_controller.cpp
 
 HEADERS += \
         mainwindow.h \
         keymanager.h \
-        vendors/nlohmann_json/nlohmann/json.hpp
+        ../../vendors/nlohmann_json/nlohmann/json.hpp \
+    ../../message/message.h \
+    ../../database/db_interface.h \
+    ../../vendors/cpp-elasticsearch/src/elasticsearch/elasticsearch.h \
+    ../../vendors/cpp-elasticsearch/src/http/http.h \
+    ../../vendors/cpp-elasticsearch/src/json/json.h \
+    mainwindow_controller.h
 
 FORMS += \
         mainwindow.ui
+
+INCLUDEPATH += ../../vendors/nlohmann_json/ ../../ ../../vendors/cpp-elasticsearch/src/
 
 unix|win32: LIBS += -lzmq
 

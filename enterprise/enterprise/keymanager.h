@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
-#include "vendors/nlohmann_json/nlohmann/json.hpp"
+#include "nlohmann/json.hpp"
 
 extern "C" {
 #include "sodium.h"

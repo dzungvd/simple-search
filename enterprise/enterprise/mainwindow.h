@@ -5,7 +5,7 @@
 #include <QDir>
 #include <QDebug>
 
-#include "keymanager.h"
+#include "mainwindow_controller.h"
 
 namespace Ui {
 class MainWindow;
@@ -28,15 +28,11 @@ private slots:
 
     void on_log_loginButton_clicked();
 
+    void on_deal_logout_clicked();
+
 private:
     Ui::MainWindow *ui;
-
-    //user is identified with two keys
-    char* secret_key_;
-    char* public_key_;
-
-    size_t secret_key_len_;
-    size_t public_key_len_;
+    MainwindowController main_controller_;
 };
 
 #endif // MAINWINDOW_H
