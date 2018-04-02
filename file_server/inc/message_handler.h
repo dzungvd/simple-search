@@ -1,8 +1,10 @@
 #ifndef _MESSAGE_HANDLER_H
 #define _MESSAGE_HANDLER_H
 
-#include "message.h"
-#include "db_interface.h"
+#include "message/message.h"
+#include "database/db_interface.h"
+#include "utils/utils.h"
+
 #include <boost/filesystem.hpp>
 #include <fstream>
 

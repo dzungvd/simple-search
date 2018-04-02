@@ -6,9 +6,11 @@
 #include <pthread.h>
 #include <assert.h>
 #include <queue>
-#include "message.h"
+#include "message/message.h"
+#include "utils/utils.h"
 #include "message_handler.h"
 #include "message_crypto.h"
+
 namespace bitmile {
 
   /*!

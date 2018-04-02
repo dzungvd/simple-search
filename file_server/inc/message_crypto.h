@@ -1,7 +1,7 @@
 #ifndef _MESSAGE_CRYPTO_
 #define _MESSAGE_CRYPTO_
 
-#include "message.h"
+#include "message/message.h"
 #include <fstream>
 #include <assert.h>
 #include <vector>
