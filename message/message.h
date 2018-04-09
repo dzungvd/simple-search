@@ -39,10 +39,12 @@ namespace msg {
 
   class KeywordQueryMes : public Message {
   public:
+    KeywordQueryMes();
     KeywordQueryMes(MessageType type, const char* dat, size_t size);
     void Serialize (std::vector<char>& return_data);
 
     std::vector<std::string> GetKeywords();
+    void SetKeywords(std::vector<std::string>& keywords);
   protected:
     void Deserialize(const char* dat, size_t size);
 

@@ -1,14 +1,29 @@
 #ifndef MainwindowController_H
 #define MainwindowController_H
 
+#include "sqlite_manager.h"
 #include "keymanager.h"
+#include "database/db_interface.h"
+#include "message/message.h"
+#include "zmq_manager.h"
+#include "utils/utils.h"
+#include "blockchain/blockchain_interface.h"
+
+#include <sio_client.h>
 #include <QDir>
 #include <QDebug>
-#include <string>
 #include <QString>
+#include <QObject>
 
-class MainwindowController
+#include <string>
+#include <vector>
+#include <set>
+#include <functional>
+
+class MainwindowController : public QObject
 {
+    Q_OBJECT
+
 public:
     MainwindowController();
 
@@ -19,7 +34,24 @@ public:
     bool registerNewUser ();
     void clearCredential ();
 
+    //new deal function
+    void addKeyword (std::string keyword);
+    void removeKeyword (std::string keyword);
+    std::set<std::string> getKeywords();
+    std::vector<bitmile::db::Document> getSearchedDoc();
+    void search ();
+
+    void onNewDealReply(const std::string& mes, sio::message::ptr const& data);
+
+    bool createDeal(std::string blockchain_addr, std::string blockchain_pass);
+    ~MainwindowController();
+
+Q_SIGNALS:
+    void keywords_array_changed ();
+    void search_done ();
 private:
+
+    ZmqManager* socket_manager;
 
     //login page attribute
     std::string username_;
@@ -31,6 +63,15 @@ private:
 
     size_t secret_key_len_;
     size_t public_key_len_;
+
+    //new deal atributes
+    std::set<std::string> keywords_;
+    std::vector<bitmile::db::Document> searched_docs_;
+
+    bitmile::blockchain::BlockchainInterface blockchain_;
+
+    //socket for communicate with proxy server
+    sio::client proxy_socket_;
 };
 
 #endif // MainwindowController_H

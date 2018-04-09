@@ -4,7 +4,9 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+
 #include "nlohmann/json.hpp"
+#include "utils/utils.h"
 
 extern "C" {
 #include "sodium.h"
@@ -18,8 +20,6 @@ public:
                         char** secret_key, size_t &secret_key_len,
                         char** public_key, size_t &public_key_len);
     static bool createKey (std::string& file_path, std::string& passphrase);
-    static std::string convertToBase64 (const unsigned char* input, size_t input_len);
-    static std::string convertFromB64ToBin (const char* input, unsigned long long input_len);
 };
 
 #endif // KEYMANAGER_H

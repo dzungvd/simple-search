@@ -25,6 +25,7 @@ namespace bitmile {
   }
 
   msg::Message* MessageHandler::HandleKeywordQuery (msg::Message* query) {
+    std::cout << "handle keyword query" << std::endl;
     //get all user encrypt password
     //encrypt all keywords and send query to database server
     msg::KeywordQueryMes* keyword_query = static_cast <msg::KeywordQueryMes*> (query);
@@ -33,7 +34,6 @@ namespace bitmile {
 
     //send query to database
     db_.QueryDocWithKeywords (keyword_query->GetKeywords(), results);
-
     /*
     for (int i = 0; i < results.size(); i++) {
       std::cout << "result " << i << std::endl

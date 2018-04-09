@@ -44,10 +44,10 @@ bool KeyManager::getKey(std::string& file_path, std::string& passphrase,
             salt_b64 = key_json["salt"];
 
 
-    std::string nonce = convertFromB64ToBin(nonce_b64.c_str(), nonce_b64.length());
-    std::string public_key = convertFromB64ToBin(public_key_b64.c_str(), public_key_b64.length());
-    std::string ciphertext = convertFromB64ToBin(ciphertext_b64.c_str(), ciphertext_b64.length());
-    std::string salt = convertFromB64ToBin(salt_b64.c_str(), salt_b64.length());
+    std::string nonce = Utils::convertFromB64ToBin(nonce_b64.c_str(), nonce_b64.length());
+    std::string public_key = Utils::convertFromB64ToBin(public_key_b64.c_str(), public_key_b64.length());
+    std::string ciphertext = Utils::convertFromB64ToBin(ciphertext_b64.c_str(), ciphertext_b64.length());
+    std::string salt = Utils::convertFromB64ToBin(salt_b64.c_str(), salt_b64.length());
 
     if (nonce == "" || public_key == "" || ciphertext == "" || salt == "") {
         //failed to decode string
@@ -137,7 +137,7 @@ bool KeyManager::createKey(std::string& file_path, std::string& passphrase) {
 
     nlohmann::json key_json;
     //save public key to json
-    key_json["public_key"] = convertToBase64(pk, sizeof pk);
+    key_json["public_key"] = Utils::convertToBase64(pk, sizeof pk);
 
     unsigned char key[crypto_aead_xchacha20poly1305_ietf_KEYBYTES];
     unsigned char nonce[crypto_aead_xchacha20poly1305_ietf_NPUBBYTES];
@@ -146,14 +146,14 @@ bool KeyManager::createKey(std::string& file_path, std::string& passphrase) {
     randombytes_buf(nonce, sizeof nonce);
 
     //convert nonce to base 64 and save to json
-    key_json["nonce"] = convertToBase64(nonce, sizeof nonce);
+    key_json["nonce"] = Utils::convertToBase64(nonce, sizeof nonce);
 
     //generate key
     unsigned char salt[crypto_pwhash_SALTBYTES];
     randombytes_buf(salt, sizeof salt);
 
     //save salt to key file
-    key_json["salt"] = convertToBase64(salt, sizeof salt);
+    key_json["salt"] = Utils::convertToBase64(salt, sizeof salt);
 
     if (crypto_pwhash(key, sizeof key, passphrase.c_str(), passphrase.length(), salt,
                       crypto_pwhash_OPSLIMIT_INTERACTIVE, crypto_pwhash_MEMLIMIT_INTERACTIVE,
@@ -173,7 +173,7 @@ bool KeyManager::createKey(std::string& file_path, std::string& passphrase) {
                                                NULL, nonce, key);
 
     //save private key to json file
-    key_json["ciphertext"] = convertToBase64(ciphertext, sizeof ciphertext);
+    key_json["ciphertext"] = Utils::convertToBase64(ciphertext, sizeof ciphertext);
 
 
     key_file << key_json.dump(4);
@@ -181,44 +181,3 @@ bool KeyManager::createKey(std::string& file_path, std::string& passphrase) {
     return true;
 }
 
-std::string KeyManager::convertToBase64(const unsigned char *input, size_t input_len) {
-
-    if (input == NULL) {
-        return std::string ("");
-    }
-
-    size_t b64_maxlen = sodium_base64_ENCODED_LEN(input_len, sodium_base64_VARIANT_ORIGINAL);
-    //encode len = string_length + '\0' character
-
-    char* b64 = new char [b64_maxlen];
-
-    sodium_bin2base64(b64, b64_maxlen,
-                      input, input_len,
-                      sodium_base64_VARIANT_ORIGINAL);
-
-    //b64_maxlen is string length plus '\0' char => discard the '\0' char before
-    //puting it to result string
-    std::string result (b64, b64_maxlen - 1);
-
-    delete[] b64;
-    return result;
-}
-
-std::string KeyManager::convertFromB64ToBin(const char *input, unsigned long long input_len) {
-    if (input == NULL) {
-        return std::string ("");
-    }
-    size_t bin_maxlen = input_len * 2;
-    char* bin = new char [bin_maxlen];
-    size_t bin_len = 0;
-    if (sodium_base642bin(reinterpret_cast<unsigned char*> (bin), bin_maxlen,
-                          input, input_len,
-                          NULL, &bin_len,
-                          NULL, sodium_base64_VARIANT_ORIGINAL) != 0) {
-        delete[] bin;
-        return std::string ("");
-    }
-    std::string result (bin, bin_len);
-    delete[] bin;
-    return result;
-}

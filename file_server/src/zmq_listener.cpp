@@ -104,6 +104,7 @@ namespace bitmile {
               //parse raw data into specific message format
               msg::Message* mes = mes_factory_.CreateMessage(type, (char*)raw_data.data(), raw_data.size());
 
+              std::cout << "mes: " << mes->Type() << std::endl;
               //handle message
               msg::Message* ret_mes = msg_handler_->Handle (mes);
 

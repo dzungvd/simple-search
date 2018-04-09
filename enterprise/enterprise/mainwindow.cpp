@@ -7,6 +7,15 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->stackedWidget->setCurrentWidget(ui->LoginPage);
+    ui->new_keywordList->hide();
+    ui->new_searchResultFrame->hide();
+
+    //connect slots
+    connect(&main_controller_, SIGNAL(keywords_array_changed()),
+            this, SLOT(on_new_keyword_changed()));
+
+    connect(&main_controller_, SIGNAL(search_done()),
+            this, SLOT(on_search_done()));
 }
 
 MainWindow::~MainWindow()
@@ -96,4 +105,74 @@ void MainWindow::on_deal_logout_clicked()
 {
     main_controller_.clearCredential();
     ui->stackedWidget->setCurrentWidget(ui->LoginPage);
+}
+
+void MainWindow::on_new_addKeyword_returnPressed()
+{
+    if (ui->new_addKeyword->text() != "") {
+        main_controller_.addKeyword(ui->new_addKeyword->text().toLower().toStdString());
+    }
+    ui->new_addKeyword->clear();
+}
+
+void MainWindow::on_new_keyword_changed() {
+    std::set<std::string> keywords = main_controller_.getKeywords();
+    while (ui->new_keywordList->count() > 0) {
+        delete ui->new_keywordList->takeItem(0);
+    }
+    if (keywords.size() == 0) {
+        ui->new_keywordList->hide();
+    }
+
+    for (std::set <std::string>::iterator beg = keywords.begin();
+         beg != keywords.end(); beg++) {
+        ui->new_keywordList->addItem(QString( (*beg).c_str() ));
+    }
+
+    ui->new_keywordList->show();
+}
+
+void MainWindow::on_new_keywordList_itemDoubleClicked(QListWidgetItem *item)
+{
+    //update controller data
+    main_controller_.removeKeyword(item->text().toStdString());
+
+}
+
+void MainWindow::on_new_searchButton_clicked()
+{
+    main_controller_.search ();
+}
+
+void MainWindow::on_search_done() {
+    while (ui->new_documentList->count() > 0) {
+        delete ui->new_documentList->takeItem(0);
+    }
+
+    std::vector<bitmile::db::Document> docs = main_controller_.getSearchedDoc();
+
+    for (int i = 0; i < docs.size(); i++) {
+        ui->new_documentList->addItem(QString (docs[i].GetElasticDocId().c_str()));
+    }
+    ui->new_searchResultFrame->show();
+}
+
+
+void MainWindow::on_new_createDealButton_clicked()
+{
+    //create new deal, publish it to blockchain
+    if (ui->new_dealPrize->text() == "") {
+
+    }
+
+    if (ui->new_blockchainAddr->text() == "") {
+
+    }
+
+    if (ui->new_blockchainPass->text() == "") {
+
+    }
+    main_controller_.createDeal(ui->new_blockchainAddr->text().toStdString(),
+                                ui->new_blockchainPass->text().toStdString());
+
 }
