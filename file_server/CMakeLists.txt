@@ -16,7 +16,7 @@ set(ELASTIC_CPP_INC "${CMAKE_SOURCE_DIR}/vendors/cpp-elasticsearch/src")
 list(APPEND PROJ_SOURCE ${ELASTIC_CPP_SOURCE})
 
 #add json library
-set(JSON_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/vendors/nlohmann_json")
+set(JSON_FOLDER "${CMAKE_SOURCE_DIR}/vendors/nlohmann_json")
 
 INCLUDE_DIRECTORIES("${PROJ_INCLUDES}" "${ELASTIC_CPP_INC}" "${JSON_FOLDER}")
 

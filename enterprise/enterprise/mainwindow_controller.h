@@ -1,7 +1,6 @@
 #ifndef MainwindowController_H
 #define MainwindowController_H
 
-#include "sqlite_manager.h"
 #include "keymanager.h"
 #include "database/db_interface.h"
 #include "message/message.h"
