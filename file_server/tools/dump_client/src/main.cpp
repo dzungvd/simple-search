@@ -3,7 +3,7 @@
  */
 
 #include <zmq.hpp>
-#include "message.h"
+#include "message/message.h"
 #include <vector>
 #include <string>
 #include <iostream>

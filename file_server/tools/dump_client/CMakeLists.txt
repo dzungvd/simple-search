@@ -1,6 +1,6 @@
 set (PROJ_NAME dump_client)
-set (PROJ_INCLUDES "inc;../../inc")
-set (PROJ_SOURCE "src/main.cpp" "../../src/message.cpp" "../../src/db_interface.cpp")
+set (PROJ_INCLUDES "inc;${CMAKE_SOURCE_DIR}")
+set (PROJ_SOURCE "src/main.cpp" "${CMAKE_SOURCE_DIR}/message/message.cpp" "${CMAKE_SOURCE_DIR}/database/db_interface.cpp")
 
 list(APPEND PROJ_SOURCE ${ELASTIC_CPP_SOURCE})
 

@@ -1,22 +1,22 @@
 #file server cmake file
 
 set(PROJ_NAME file_server)
-set(PROJ_INCLUDES "inc")
-set(PROJ_SOURCE "src/main.cpp" "src/zmq_listener.cpp" "src/message.cpp" "src/message_handler.cpp" "src/message_crypto.cpp" "src/db_interface.cpp" )
+set(PROJ_INCLUDES "inc" "${CMAKE_SOURCE_DIR}")
+set(PROJ_SOURCE "src/main.cpp" "src/zmq_listener.cpp" "src/message_handler.cpp" "src/message_crypto.cpp" "${CMAKE_SOURCE_DIR}/message/message.cpp" "${CMAKE_SOURCE_DIR}/database/db_interface.cpp" "${CMAKE_SOURCE_DIR}/utils/utils.cpp")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/")
 message ("cmake module ${CMAKE_MODULE_PATH}")
 
 #add elastic cpp to our project
-set(ELASTIC_CPP_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/vendors/cpp-elasticsearch/src")
+set(ELASTIC_CPP_FOLDER "${CMAKE_SOURCE_DIR}/vendors/cpp-elasticsearch/src")
 set(ELASTIC_CPP_SOURCE "${ELASTIC_CPP_FOLDER}/elasticsearch/elasticsearch.cpp" "${ELASTIC_CPP_FOLDER}/json/json.cpp" "${ELASTIC_CPP_FOLDER}/http/http.cpp")
 
-set(ELASTIC_CPP_INC "${CMAKE_CURRENT_SOURCE_DIR}/vendors/cpp-elasticsearch/src")
+set(ELASTIC_CPP_INC "${CMAKE_SOURCE_DIR}/vendors/cpp-elasticsearch/src")
 
 list(APPEND PROJ_SOURCE ${ELASTIC_CPP_SOURCE})
 
 #add json library
-set(JSON_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/vendors/nlohmann_json")
+set(JSON_FOLDER "${CMAKE_SOURCE_DIR}/vendors/nlohmann_json")
 
 INCLUDE_DIRECTORIES("${PROJ_INCLUDES}" "${ELASTIC_CPP_INC}" "${JSON_FOLDER}")
 

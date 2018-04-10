@@ -3,9 +3,17 @@
 namespace bitmile {
   namespace msg {
 
+    KeywordQueryMes::KeywordQueryMes() {
+      type_ = KEYWORD_QUERY;
+    }
+
     KeywordQueryMes::KeywordQueryMes (MessageType type, const char* dat, size_t size) {
       type_ = type;
       Deserialize (dat, size);
+    }
+
+    void KeywordQueryMes::SetKeywords(std::vector<std::string>& keywords) {
+        keywords_ = keywords;
     }
 
     void KeywordQueryMes::Deserialize(const char* dat, size_t size) {
@@ -50,9 +58,7 @@ namespace bitmile {
        */
       //TODO: add support for unicode here
       //Get data size
-
-      int size = sizeof (MessageType);
-
+      size_t size = 0;
       for (int i = 0; i < keywords_.size(); i++) {
         //1 additional byte for NULL charactrer
         size += keywords_[i].length() + 1;
@@ -62,9 +68,6 @@ namespace bitmile {
 
       //copy data to container
       int offset = 0;
-
-      memcpy (&return_data[offset], &type_, sizeof (MessageType));
-      offset += sizeof (MessageType);
 
       for (int i = 0; i < keywords_.size(); i++) {
         memcpy (&return_data[offset], keywords_[i].c_str(), keywords_[i].length() + 1);
@@ -94,8 +97,7 @@ namespace bitmile {
        * elastic_doc_id - string - elastic system doc id
        * strings are seperated by NULL char
        */
-
-      int size = sizeof (MessageType);
+      size_t size = 0;
       for (int i = 0; i < docs_.size() ; i++) {
         size += docs_[i].GetOwnerAddress().length() + 1;
         size += docs_[i].GetOwnerDocId().length() + 1;
@@ -104,8 +106,6 @@ namespace bitmile {
 
       return_data.resize (size);
       int offset = 0;
-      memcpy (&return_data[offset], &type_, sizeof (MessageType));
-      offset += sizeof (MessageType);
 
       std::string owner_addr, owner_doc_id, elastic_id;
       for (int i = 0; i < docs_.size() ; i++) {

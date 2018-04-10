@@ -144,10 +144,9 @@ namespace bitmile{
        *   3. data: link to real data
        *   4. docId: document id for owner
        */
-      valid = valid && json_source.member ("owner") &&
+      valid = valid && json_source.member ("owner_address") &&
         json_source.member ("keywords") &&
-        json_source.member ("data") &&
-        json_source.member ("docId");
+        json_source.member ("doc_id");
 
       if (!valid) {
         return false;
@@ -156,8 +155,8 @@ namespace bitmile{
 
       //get content data
       elastic_doc_id_ = json_doc["_id"].getString();
-      owner_address_ = json_source["owner"].getString();
-      doc_id_ = json_source["docId"].getString();
+      owner_address_ = json_source["owner_address"].getString();
+      doc_id_ = json_source["doc_id"].getString();
 
       return true;
     }
@@ -226,7 +225,7 @@ namespace bitmile{
       Json::Object query_level;
       query_level.addMemberByKey("query", bool_level);
 
-
+      std::cout << "query: " << query_level.str() << std::endl;
       /* send query to elastic and get json result
        *
        *example result format:
@@ -274,6 +273,8 @@ namespace bitmile{
       hit_list = j_result.getValue("hits").getObject().getValue("hits").getArray();
       Json::Array::const_iterator hit_list_iter = hit_list.begin();
 
+      std::cout << "hit: " << hit_list.str() << std::endl;
+
       while (hit_list_iter != hit_list.end()) {
         Document doc;
         if (doc.ParseJson ((*hit_list_iter).getObject())) {
@@ -281,6 +282,7 @@ namespace bitmile{
         }
         ++hit_list_iter;
       }
+      std::cout << "result: " << result.size() << std::endl;
     }
 
     std::string DbInterface::InsertDoc (const Document& doc) {

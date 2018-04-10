@@ -80,11 +80,15 @@ namespace bitmile {
 
           if (msg_crypto.DecryptSetKeyMsg ((char*) request.data() + sizeof (msg::MessageType), request.size() - sizeof (msg::MessageType), key, nonce)) {
             client_key_map[client_id] = std::pair <std::vector<char>, std::vector<char> > (key, nonce);
-
+            {
+              std::cout << "key: " <<Utils::convertToBase64 (reinterpret_cast <unsigned char*> (key.data()), key.size()) <<std::endl
+                        << "nonce: " << Utils::convertToBase64 (reinterpret_cast <unsigned char* > (nonce.data()), nonce.size()) << std::endl;
+            }
 
           }else {
             //TODO: handle can't get secret key
             //msg::Message* reply = mes_factory_.CreateMessage(msg::SET_ENCRYPT_KEY_REPLY, )
+            std::cout << "failed to setup secret key with client" << std::endl;
           }
 
 
@@ -100,6 +104,7 @@ namespace bitmile {
               //parse raw data into specific message format
               msg::Message* mes = mes_factory_.CreateMessage(type, (char*)raw_data.data(), raw_data.size());
 
+              std::cout << "mes: " << mes->Type() << std::endl;
               //handle message
               msg::Message* ret_mes = msg_handler_->Handle (mes);
 
