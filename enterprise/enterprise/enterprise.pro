@@ -37,7 +37,8 @@ SOURCES += \
     mainwindow_controller.cpp \
     zmq_manager.cpp \
     ../../utils/utils.cpp \
-    ../../blockchain/blockchain_interface.cpp
+    ../../blockchain/blockchain_interface.cpp \
+    internaldb.cpp
 
 
 HEADERS += \
@@ -53,7 +54,8 @@ HEADERS += \
     zmq_manager.h \
     utils.h \
     ../../utils/utils.h \
-    ../../blockchain/blockchain_interface.h
+    ../../blockchain/blockchain_interface.h \
+    internaldb.h
 
 FORMS += \
         mainwindow.ui
