@@ -22,15 +22,14 @@ bool InternalDB::establiseConnection() {
     if (sqlDbName.isEmpty())
             sqlDbName.append(DEFAULT_DB_NAME);
 
-    if (db.isOpen())
-        db.close();
+    disconnect();
 
     db = QSqlDatabase::addDatabase("QSQLITE");
     db.setDatabaseName(sqlDbName);
 
     Q_ASSERT(db.open());
 
-    // create db if not exits
+    // create db if not exists
     sqlQuery = QSqlQuery(db);
     createDB();
 }

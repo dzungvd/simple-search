@@ -10,7 +10,7 @@
 
 /* table structure */
 #define OWNER_TABLE "Owner"
-#define     OWNER_ADDRESS "address"                     // BLOB             <- BASE64
+#define     OWNER_ADDRESS "address"                     // BLOB             <- TEXT
 
 #define DEAL_TABLE "Deal"
 #define     DEAL_PRICE "price"                          // DOUBLE PRECISION

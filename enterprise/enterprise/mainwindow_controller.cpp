@@ -138,7 +138,7 @@ void MainwindowController::search () {
 bool MainwindowController::createDeal(std::string blockchain_addr, std::string blockchain_pass) {
     qDebug() << "unlock account: " << blockchain_.UnlockAccount(blockchain_addr, blockchain_pass, 10);
     // emit binary
-    char buf[] = "{\"mes\": \"anh Duc dien\"}";
+    char buf[] = "{\"mes\": \"test\"}";
     proxy_socket_.socket()->emit("newDeal", std::make_shared<std::string>(buf,23));
     return insertToInternalDB();
 }
