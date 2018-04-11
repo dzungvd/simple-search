@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "internaldb.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -16,6 +17,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(&main_controller_, SIGNAL(search_done()),
             this, SLOT(on_search_done()));
+
+    main_controller_.setMainWindowPtr(ui);
 }
 
 MainWindow::~MainWindow()

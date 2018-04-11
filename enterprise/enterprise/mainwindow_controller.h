@@ -19,6 +19,10 @@
 #include <set>
 #include <functional>
 
+namespace Ui {
+class MainWindow;
+}
+
 class MainwindowController : public QObject
 {
     Q_OBJECT
@@ -43,11 +47,14 @@ public:
     void onNewDealReply(const std::string& mes, sio::message::ptr const& data);
 
     bool createDeal(std::string blockchain_addr, std::string blockchain_pass);
+    void setMainWindowPtr (Ui::MainWindow* _ui);
     ~MainwindowController();
 
 Q_SIGNALS:
     void keywords_array_changed ();
     void search_done ();
+private:
+    bool insertToInternalDB();
 private:
 
     ZmqManager* socket_manager;
@@ -71,6 +78,9 @@ private:
 
     //socket for communicate with proxy server
     sio::client proxy_socket_;
+
+    // ui property
+    Ui::MainWindow *ui;
 };
 
 #endif // MainwindowController_H
