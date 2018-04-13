@@ -19,17 +19,14 @@
 #include <set>
 #include <functional>
 
-namespace Ui {
-class MainWindow;
-}
-
-class MainwindowController : public QObject
+class AccountManager : public QObject
 {
     Q_OBJECT
 
 public:
-    MainwindowController();
+    AccountManager(QObject* parent = 0);
 
+    static AccountManager* getInstance();
     //authentication function
     void setUsername (std::string username);
     void setPassword (std::string password_);
@@ -40,6 +37,7 @@ public:
     //new deal function
     void addKeyword (std::string keyword);
     void removeKeyword (std::string keyword);
+    void clearKeywords();
     std::set<std::string> getKeywords();
     std::vector<bitmile::db::Document> getSearchedDoc();
     void search ();
@@ -47,14 +45,18 @@ public:
     void onNewDealReply(const std::string& mes, sio::message::ptr const& data);
 
     bool createDeal(std::string blockchain_addr, std::string blockchain_pass);
-    void setMainWindowPtr (Ui::MainWindow* _ui);
-    ~MainwindowController();
+
+    QString getSecretKey () const;
+    QString getPublicKey () const;
+
+    QString getUsername() const;
+    QString getPassword() const;
+    ~AccountManager();
 
 Q_SIGNALS:
     void keywords_array_changed ();
     void search_done ();
-private:
-    bool insertToInternalDB();
+
 private:
 
     ZmqManager* socket_manager;
@@ -78,9 +80,6 @@ private:
 
     //socket for communicate with proxy server
     sio::client proxy_socket_;
-
-    // ui property
-    Ui::MainWindow *ui;
 };
 
 #endif // MainwindowController_H

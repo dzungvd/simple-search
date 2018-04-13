@@ -29,8 +29,8 @@
 #define     DEALOWNER_ENCRYPT_DATA "encrypt_data"       // BLOB             <- BASE64
 #define     DEALOWNER_DECRYPT_DATA "decrypt_data"       // BLOB             <- BASE64
 #define     DEALOWNER_SECRETKEY "owner_secret_key"      // BLOB             <- BASE64
-#define     DEALOWNER_DOC_ID "owner_doc_id"             // UNSIGNED BIG INT
-#define     DEALOWNER_ELASTICID  "elastic_id"           // UNSIGNED BIG INT
+#define     DEALOWNER_DOC_ID "owner_doc_id"             // BLOB             <- TEXT
+#define     DEALOWNER_ELASTICID  "elastic_id"           // BLOB             <- TEXT
 
 class InternalDB : public QObject {
     Q_OBJECT
@@ -46,8 +46,20 @@ public:
        quint64  time;
     };
 
+    enum DEAL_PROPERTY_INDEX {
+        DEAL_PRICE_INDEX = 0,
+        DEAL_PUBLIC_KEY_INDEX,
+        DEAL_PRIVATE_KEY_INDEX,
+        DEAL_KEYWORDS_INDEX,
+        DEAL_TIME_INDEX
+    };
+
     struct Owner {
         QString address;
+    };
+
+    enum OWNER_PROPERTY_INDEX {
+        OWNER_ADDRESS_INDEX = 0
     };
 
     struct DealOwner {
@@ -57,8 +69,19 @@ public:
         QString encrypt_data;
         QString decrypt_data;
         QString owner_secret_key;
-        quint64 owner_doc_id;
-        quint64 elastic_id;
+        QString owner_doc_id;
+        QString elastic_id;
+    };
+
+    enum DEALOWNER_PROPERTY_INDEX {
+        DEALOWNER_DEALTIME_INDEX = 0,
+        DEALOWNER_OWNER_ADDRESS_INDEX,
+        DEALOWNER_STATUS_INDEX,
+        DEALOWNER_ENCRYPT_DATA_INDEX,
+        DEALOWNER_DECRYPT_DATA_INDEX,
+        DEALOWNER_SECRET_KEY_INDEX,
+        DEALOWNER_DOC_ID_INDEX,
+        DEALOWNER_ELASTIC_ID_INDEX
     };
 
 public:
@@ -89,7 +112,7 @@ public:
     // get set properties
     void setSqlDbName(const QString& _sqlPathName);
     QString getSqlDbName() const;
-    QSqlQuery* getSqlQuery() const;
+    QSqlQuery* getSqlQuery();
 
 private:
     QString convertToString(const quint64 arg) {return QString("%1").arg(arg);}

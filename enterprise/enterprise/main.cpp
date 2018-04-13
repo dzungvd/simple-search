@@ -1,14 +1,34 @@
 #include "keymanager.h"
 #include "mainwindow.h"
-#include <QApplication>
+#include <QGuiApplication>
+#include <QQmlContext>
+#include <QQmlApplicationEngine>
 #include <QDir>
 #include <QString>
 
+#include "dealmanager.h"
+
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
-    MainWindow w;
-    w.show();
+    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    QGuiApplication app (argc, argv);
 
-    return a.exec();
+    QQmlApplicationEngine engine;
+    MainWindow* mainWindow = new MainWindow();
+
+    engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+    if (engine.rootObjects().isEmpty())
+        return -1;
+
+    // Register qml Type
+    QQmlContext* context = engine.rootContext();
+
+    context->setContextProperty("account", mainWindow);
+
+    QString uriStr = "Manager";
+    QByteArray ba = uriStr.toLatin1();
+    const char *uri = ba.data();
+
+    qmlRegisterType<DealManager>(uri, 1, 0, "DealManager");
+    return app.exec();
 }

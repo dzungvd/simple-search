@@ -1,0 +1,15 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Login.qml</file>
+        <file>CreateDeal.qml</file>
+        <file>DealManger.qml</file>
+        <file>Register.qml</file>
+        <file>main.qml</file>
+        <file>CustomizeButton.qml</file>
+        <file>AbstractScreen.qml</file>
+        <file>BoardManager.qml</file>
+        <file>Setting.qml</file>
+        <file>CustomizeLabel.qml</file>
+        <file>DealItem.qml</file>
+    </qresource>
+</RCC>
