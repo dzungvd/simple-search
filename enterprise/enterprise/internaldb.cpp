@@ -69,7 +69,7 @@ bool InternalDB::createDB() {
 
     // create Deal table
     q = QString ("CREATE TABLE IF NOT EXISTS %1 (%2 DOUBLE, "
-                 "                 %3 BLOB, %4 BLOB, %5 BLOB, %6 UNSIGNED BIG INT PRIMARY KEY)"
+                 "                 %3 BLOB, %4 BLOB, %5 BLOB, %6 BLOB PRIMARY KEY)"
                  ).arg(DEAL_TABLE, DEAL_PRICE,
                        DEAL_PUBLICKEY, DEAL_PRIVATEKEY,
                        DEAL_KEYWORDS, DEAL_TIME);
@@ -80,7 +80,7 @@ bool InternalDB::createDB() {
     }
 
     // create DealOwner Table
-    q = QString ("CREATE TABLE IF NOT EXISTS %1 (%2 UNSIGNED BIG INT, %3 BLOB, "
+    q = QString ("CREATE TABLE IF NOT EXISTS %1 (%2 BLOB, %3 BLOB, "
                  "                 %4 INT, %5 BLOB, %6 BLOB, %7 BLOB, %8 BLOB, %9 BLOB)"
                  ).arg(DEALOWNER_TABLE, DEALOWNER_DEAL_TIME, DEALOWNER_OWNER_ADDRESS,
                        DEALOWNER_STATUS, DEALOWNER_ENCRYPT_DATA, DEALOWNER_DECRYPT_DATA,

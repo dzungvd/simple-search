@@ -4,6 +4,7 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QDateTime>
+#include "dealmanager.h"
 
 MainWindow::MainWindow(QObject *parent) : QObject(parent)
 {
@@ -219,10 +220,7 @@ bool MainWindow::insertToInternalDB() {
         listKeyword.append(QJsonValue(QString::fromStdString(*i)));
     }
 
-    QJsonObject jsonObj;
-    jsonObj["keywords"] = listKeyword;
-
-    deal.keywords = QJsonDocument(jsonObj).toJson(QJsonDocument::Compact);
+    deal.keywords = QJsonDocument(listKeyword).toJson(QJsonDocument::Compact);
     qDebug() << "MainWindow Controller deal.keywords " << deal.keywords;
 
     InternalDB::getInstance()->insertDealData(deal);
@@ -247,6 +245,8 @@ bool MainWindow::insertToInternalDB() {
         InternalDB::getInstance()->insertDealOwnerData(dealOwner);
     }
 
+    DealManager::getInstance()->updateDealData();
+    DealManager::getInstance()->updateDealOwnerData();
     return true;
 }
 

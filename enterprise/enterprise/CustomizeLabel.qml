@@ -1,10 +1,9 @@
 import QtQuick 2.0
-import QtQuick.Controls 2.2
 
 Rectangle {
     id: root
     color: "#009688"
-    property var text: ""
+    property string text: ""
     property bool destroyWhenDoubleClick: false
 
     signal selfRemove(var item);

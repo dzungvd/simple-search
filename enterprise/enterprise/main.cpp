@@ -14,6 +14,7 @@ int main(int argc, char *argv[])
     QGuiApplication app (argc, argv);
 
     QQmlApplicationEngine engine;
+
     MainWindow* mainWindow = new MainWindow();
 
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
@@ -24,11 +25,11 @@ int main(int argc, char *argv[])
     QQmlContext* context = engine.rootContext();
 
     context->setContextProperty("account", mainWindow);
+    context->setContextProperty("dealInfo", DealManager::getInstance());
 
     QString uriStr = "Manager";
     QByteArray ba = uriStr.toLatin1();
     const char *uri = ba.data();
 
-    qmlRegisterType<DealManager>(uri, 1, 0, "DealManager");
     return app.exec();
 }

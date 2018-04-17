@@ -16,11 +16,11 @@
 #define     DEAL_PRICE "price"                          // DOUBLE PRECISION
 #define     DEAL_PUBLICKEY "public_key"                 // BLOB             <- BASE64
 #define     DEAL_PRIVATEKEY "private_key"               // BLOB             <- BASE64
-#define     DEAL_KEYWORDS "keywords"                    // BLOB             <- JSON format {keywords:[...]}
-#define     DEAL_TIME "time"                            // UNSIGNED BIG INT <- timestame
+#define     DEAL_KEYWORDS "keywords"                    // BLOB             <- JSON format ["","",...]}
+#define     DEAL_TIME "time"                            // BLOB             <- timestame
 
 #define DEALOWNER_TABLE "DealOwner"
-#define     DEALOWNER_DEAL_TIME "deal_time"             // UNSIGNED BIG INT
+#define     DEALOWNER_DEAL_TIME "deal_time"             // BLOB
 #define     DEALOWNER_OWNER_ADDRESS  "owner_address"    // BLOB             <- BASE64
 #define     DEALOWNER_STATUS    "status"                // INT              <- ENUM {dont_accept:0, accept:1, waiting: 2}
 #define         DEALOWNER_STATUS_DONTACCEPT  0
@@ -43,7 +43,7 @@ public:
        QString  public_key;
        QString  private_key;
        QString  keywords;
-       quint64  time;
+       qint64  time;
     };
 
     enum DEAL_PROPERTY_INDEX {
@@ -63,7 +63,7 @@ public:
     };
 
     struct DealOwner {
-        quint64 deal_time;
+        qint64 deal_time;
         QString owner_address;
         qint8   status;
         QString encrypt_data;
@@ -82,6 +82,12 @@ public:
         DEALOWNER_SECRET_KEY_INDEX,
         DEALOWNER_DOC_ID_INDEX,
         DEALOWNER_ELASTIC_ID_INDEX
+    };
+
+    enum DEALOWNER_STATUS_VALUE {
+        DEALOWNER_STATUS_VAL_IGNORE=0,
+        DEALOWNER_STATUS_VAL_ACCEPT,
+        DEALOWNER_STATUS_VAL_WAITING
     };
 
 public:
@@ -115,7 +121,7 @@ public:
     QSqlQuery* getSqlQuery();
 
 private:
-    QString convertToString(const quint64 arg) {return QString("%1").arg(arg);}
+    QString convertToString(const qint64 arg) {return QString("%1").arg(arg);}
     QString convertToString(const qreal arg) {return QString("%1").arg(arg);}
     QString convertToString(const qint8 arg) {return QString("%1").arg(arg);}
     QString convertToString(const QString arg) {return arg;}

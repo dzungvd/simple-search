@@ -1,14 +1,12 @@
 import QtQuick 2.0
-import Manager 1.0
-
 
 AbstractScreen {
     id: root
-    property var dealOwnerList: []
-    property var dealOwnerItems: []
+    property var dealList: dealInfo.dealData
+    property var dealItems: []
 
-    property var dealItemBorderColor: "#5FBA7D"
-    property var dealOwnerComponent: Qt.createComponent("DealItem.qml")
+    property string dealItemBorderColor: "#5FBA7D"
+    property var dealComponent: Qt.createComponent("DealItem.qml")
 
     Flickable {
         id:flickable
@@ -33,44 +31,48 @@ AbstractScreen {
         }
     }
 
-    DealManager {
-        id: dealManager
-    }
-
-    onDealOwnerListChanged: {
-        refestDealOwnerList()
+    onDealListChanged:  {
+        refestDealList()
     }
 
     Component.onCompleted: {
-        dealOwnerList = dealManager.getDealData()
+        dealInfo.updateDealOwnerData()
+        dealInfo.updateDealData()
     }
 
-    function refestDealOwnerList() {
-        for (var i in dealOwnerItems)
-            dealOwnerItems[i].destroy();
+    function refestDealList() {
+        for (var i in dealItems)
+            dealItems[i].destroy();
 
-        dealOwnerItems = []
+        dealItems  = []
 
-        for (var j in dealOwnerList) {
-            var dealOwnerItem = dealOwnerComponent.createObject(content);
-            var dealOwnerContent = dealOwnerList[j];
+        var date;
+        for (var j in dealList) {
+            var dealItem = dealComponent.createObject(content);
+            var dealContent = dealList[j];
 
-            dealOwnerItem.dealTimeTxt = dealOwnerContent.deal_time
-            dealOwnerItem.ownerAddressTxt = dealOwnerContent.owner_address
-            dealOwnerItem.ownerDocIdTxt = dealOwnerContent.owner_doc_id
-            dealOwnerItem.elasticIdTxt = dealOwnerContent.elastic_id
-            dealOwnerItem.statusTxt = dealOwnerContent.status
+            dealItem.timeTxt = dealContent.time;
+            dealItem.priceTxt = "" + dealContent.price;
+            dealItem.keywordList = dealContent.keywords
+            dealItem.dealOwnerData = dealInfo.getDealOwnerData(dealContent.timestamp)
 
-            dealOwnerItem.width = flickable.itemWidth
-            dealOwnerItem.height = flickable.itemHeight
-            dealOwnerItem.border.color = dealItemBorderColor
+            dealItem.width = flickable.itemWidth
+            dealItem.height = flickable.itemHeight
+            dealItem.border.color = dealItemBorderColor
+
         }
+
+        var length = 0
+        if (dealList !== undefined)
+            length = dealList.length;
 
         // caculate height of content
-        content.height = (flickable.itemHeight + flickable.spacing) * (j/2)
+        content.height = (flickable.itemHeight + flickable.spacing) * (length/2)
 
-        if (j%2) {
+        if (length%2) {
             content.height += (flickable.itemHeight + flickable.spacing)
         }
+
+        console.log ("length " + length + " content height " + content.height);
     }
 }
