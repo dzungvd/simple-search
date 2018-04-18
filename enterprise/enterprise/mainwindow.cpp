@@ -194,7 +194,6 @@ void MainWindow::setKeywords(QVariantList keywords) {
     Q_EMIT keywordsChanged(m_keywords);
 }
 
-#include "dealmanager.h"
 bool MainWindow::insertToInternalDB() {
     std::vector<bitmile::db::Document> searched_doc = account_manager_->getSearchedDoc();
 

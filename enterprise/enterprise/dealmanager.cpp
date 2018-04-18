@@ -194,9 +194,30 @@ void DealManager::updateDealData() {
 }
 
 QVariant DealManager::getOwnerData() {
-    // TODO
+    return m_ownerData;
 }
 
 void DealManager::updateOwnerData() {
-    // TODO
+    m_ownerList.clear();
+
+    InternalDB* db = InternalDB::getInstance();
+    QString q = "SELECT * from Owner";
+
+    if (!db->query(q))
+        return;
+
+    QSqlQuery* queryObj = db->getSqlQuery();
+
+    InternalDB::Owner owner;
+    QJsonArray ownerArr;
+    QJsonObject ownerItem;
+
+    while (queryObj->next()) {
+        owner.address = queryObj->value(InternalDB::OWNER_ADDRESS_INDEX).toString();
+        ownerItem[OWNER_ADDRESS] = owner.address;
+        ownerArr.append(ownerItem);
+    }
+
+    m_ownerData = QJsonDocument(ownerArr).toVariant();
+    Q_EMIT ownerDataChanged(m_ownerData);
 }

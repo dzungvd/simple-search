@@ -43,7 +43,7 @@ public:
        QString  public_key;
        QString  private_key;
        QString  keywords;
-       qint64  time;
+       qint64   time;
     };
 
     enum DEAL_PROPERTY_INDEX {

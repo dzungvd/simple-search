@@ -1,4 +1,7 @@
 #include "utils.h"
+#include <QDir>
+#include <QString>
+#include <QDebug>
 
 Utils::Utils()
 {
@@ -45,4 +48,29 @@ std::string Utils::convertFromB64ToBin(const char *input, unsigned long long inp
     std::string result (bin, bin_len);
     delete[] bin;
     return result;
+}
+
+bool Utils::createFolder (QString folderPath) {
+    //dont continuous process if exists before
+    if (Utils::isExists(folderPath)) {
+        qDebug() << "Util::createFolder " << folderPath << " was exists";
+        return true;
+    }
+    QDir dir;
+    return dir.mkdir(folderPath);
+}
+
+bool Utils::createFile (QString filePath) {
+    // dont continuous process if exists before
+    if (Utils::isExists(filePath)) {
+        qDebug() << "Util::createFile " << filePath << " was exists";
+        return true;
+    }
+    QDir dir;
+    return dir.mkpath(filePath);
+}
+
+bool Utils::isExists(QString path) {
+    QDir dir(path);
+    return dir.exists();
 }
