@@ -151,3 +151,5 @@ else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../.
 else:unix: PRE_TARGETDEPS += $$PWD/../../vendors/openssl_1.1.0g/lib/libssl.a
 
 DISTFILES +=
+
+unix|win32: LIBS += -lboost_filesystem

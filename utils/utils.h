@@ -15,9 +15,9 @@ public:
     static std::string convertFromB64ToBin (const char* input, unsigned long long input_len);
 
     // interact with file and folder
-    static bool createFolder (QString folderPath);
-    static bool createFile (QString filePath);
-    static bool isExists(QString path);
+    static bool createFolder (std::string folderPath);
+    static bool createFile (std::string filePath);
+    static bool isExists(std::string path);
 };
 
 #endif // UTILS_H
