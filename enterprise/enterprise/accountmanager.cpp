@@ -68,7 +68,7 @@ bool AccountManager::registerNewUser() {
     QString folderContainKeys = QDir::currentPath() + "/keystore";
 
     // create folder contain key if not exists before
-    Utils::createFolder(folderContainKeys);
+    Utils::createFolder(folderContainKeys.toStdString());
 
     //if it's ok then create key file
     std::string file_path = (folderContainKeys + "/" + QString(username_.c_str()) + ".key").toStdString();

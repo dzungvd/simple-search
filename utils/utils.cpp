@@ -1,7 +1,8 @@
 #include "utils.h"
-#include <QDir>
-#include <QString>
-#include <QDebug>
+#include <iostream>
+#include <fstream>
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem.hpp>
 
 Utils::Utils()
 {
@@ -50,27 +51,39 @@ std::string Utils::convertFromB64ToBin(const char *input, unsigned long long inp
     return result;
 }
 
-bool Utils::createFolder (QString folderPath) {
+bool Utils::createFolder (std::string folderPath) {
     //dont continuous process if exists before
     if (Utils::isExists(folderPath)) {
-        qDebug() << "Util::createFolder " << folderPath << " was exists";
+        std::cerr << "Util::createFolder " << folderPath << " was exists" << std::endl;
         return true;
     }
-    QDir dir;
-    return dir.mkdir(folderPath);
+
+    boost::filesystem::path path(folderPath);
+    return boost::filesystem::create_directory(path);
 }
 
-bool Utils::createFile (QString filePath) {
+bool Utils::createFile (std::string filePath) {
     // dont continuous process if exists before
     if (Utils::isExists(filePath)) {
-        qDebug() << "Util::createFile " << filePath << " was exists";
+        std::cerr << "Util::createFile " << filePath << " was exists" << std::endl;
         return true;
     }
-    QDir dir;
-    return dir.mkpath(filePath);
+
+    std::ofstream of(filePath);
+    bool status = of.is_open();
+    of.close();
+    return status;
 }
 
-bool Utils::isExists(QString path) {
-    QDir dir(path);
-    return dir.exists();
+bool Utils::isExists(std::string path) {
+    boost::filesystem::path fp(path);
+
+    try {
+        if (boost::filesystem::exists(fp))
+            return true;
+    } catch (boost::filesystem::filesystem_error &e) {
+        std::cerr << e.what() << std::endl;
+    }
+
+    return false;
 }
