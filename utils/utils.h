@@ -2,7 +2,6 @@
 #define UTILS_H
 
 #include <string>
-#include <QString>
 
 extern "C" {
 #include "sodium.h"
