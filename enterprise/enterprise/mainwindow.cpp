@@ -1,125 +1,59 @@
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
 #include "internaldb.h"
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QJsonDocument>
+#include <QDateTime>
+#include "dealmanager.h"
 
-MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow)
+MainWindow::MainWindow(QObject *parent) : QObject(parent)
 {
-    ui->setupUi(this);
-    ui->stackedWidget->setCurrentWidget(ui->LoginPage);
-    ui->new_keywordList->hide();
-    ui->new_searchResultFrame->hide();
+    account_manager_ = AccountManager::getInstance();
 
     //connect slots
-    connect(&main_controller_, SIGNAL(keywords_array_changed()),
+    connect(account_manager_, SIGNAL(keywords_array_changed()),
             this, SLOT(on_new_keyword_changed()));
 
-    connect(&main_controller_, SIGNAL(search_done()),
+    connect(account_manager_, SIGNAL(search_done()),
             this, SLOT(on_search_done()));
-
-    main_controller_.setMainWindowPtr(ui);
 }
 
 MainWindow::~MainWindow()
 {
-    delete ui;
 }
 
-void MainWindow::on_reg_registerButton_clicked()
+bool MainWindow::onRegister()
 {
-    bool flag = true;
-
-    //check if username is valid
-    flag &= (ui->reg_usernameText->text() != "");
-
-    if (!flag) {
-        qDebug() << "username blank";
-        return;
-    }
-
-    flag &= (ui->reg_passwordText->text() != "");
-
-    if (!flag) {
-        qDebug() << "password field is empty";
-        return;
-    }
-
-    //check if two password holder is the same
-    flag &= (ui->reg_passwordText->text() == ui->reg_confirmPassText->text());
-
-    if (!flag) {
-        qDebug() << "password and confirm filed differ";
-        return;
-    }
-
-    main_controller_.setPassword(ui->reg_passwordText->text().toStdString());
-    main_controller_.setUsername(ui->reg_usernameText->text().toStdString());
-    flag &= main_controller_.registerNewUser();
-
-
-    if (!flag) {
-
-        return;
-    }
-
-    ui->stackedWidget->setCurrentWidget(ui->LoginPage);
+    account_manager_->setPassword(m_passTxt.toStdString());
+    account_manager_->setUsername(m_accountTxt.toStdString());
+    return account_manager_->registerNewUser();
 }
 
-void MainWindow::on_reg_LoginButton_clicked()
+bool MainWindow::onLogin()
 {
-    ui->stackedWidget->setCurrentWidget(ui->LoginPage);
+    account_manager_->setPassword(m_passTxt.toStdString());
+    account_manager_->setUsername(m_accountTxt.toStdString());
+
+    if (!account_manager_->authenticate())
+        return false;
+
+    /* establish connection to internal DB intergrated with account
+     * use username for name of db, confirm for change ???
+     */
+    InternalDB* db = InternalDB::getInstance();
+    db->setSqlDbName(account_manager_->getUsername());
+    db->establiseConnection();
 }
 
-void MainWindow::on_log_registerButton_clicked()
+void MainWindow::onLogout()
 {
-    ui->stackedWidget->setCurrentWidget(ui->RegisterPage);
-}
-
-void MainWindow::on_log_loginButton_clicked()
-{
-    bool flag = true;
-
-    flag &= (ui->log_usernameText->text() != "");
-
-    if (!flag) {
-        qDebug() << "username text empty";
-        return;
-    }
-
-    flag &= (ui->log_passwordText->text() != "");
-
-    if (!flag) {
-        qDebug() << "password text empty";
-        return;
-    }
-
-    main_controller_.setPassword(ui->log_passwordText->text().toStdString());
-    main_controller_.setUsername(ui->log_usernameText->text().toStdString());
-
-    if (!main_controller_.authenticate()) {
-        return;
-    }
-
-    ui->stackedWidget->setCurrentWidget(ui->DealManagerPage);
-}
-
-void MainWindow::on_deal_logout_clicked()
-{
-    main_controller_.clearCredential();
-    ui->stackedWidget->setCurrentWidget(ui->LoginPage);
-}
-
-void MainWindow::on_new_addKeyword_returnPressed()
-{
-    if (ui->new_addKeyword->text() != "") {
-        main_controller_.addKeyword(ui->new_addKeyword->text().toLower().toStdString());
-    }
-    ui->new_addKeyword->clear();
+    account_manager_->clearCredential();
+    InternalDB::getInstance()->disconnect();
 }
 
 void MainWindow::on_new_keyword_changed() {
-    std::set<std::string> keywords = main_controller_.getKeywords();
+    /*
+    std::set<std::string> keywords = account_manager_->getKeywords();
     while (ui->new_keywordList->count() > 0) {
         delete ui->new_keywordList->takeItem(0);
     }
@@ -133,49 +67,185 @@ void MainWindow::on_new_keyword_changed() {
     }
 
     ui->new_keywordList->show();
+    */
 }
 
-void MainWindow::on_new_keywordList_itemDoubleClicked(QListWidgetItem *item)
+void MainWindow::on_new_keywordList_itemDoubleClicked(QVariant item)
 {
     //update controller data
-    main_controller_.removeKeyword(item->text().toStdString());
+    account_manager_->removeKeyword(item.toString().toStdString());
 
 }
 
 void MainWindow::on_new_searchButton_clicked()
 {
-    main_controller_.search ();
+    account_manager_->clearKeywords();
+    for (QVariantList::iterator i = m_keywords.begin(); i != m_keywords.end(); i++)
+        account_manager_->addKeyword((*i).toString().toLower().toStdString());
+
+    account_manager_->search();
 }
 
 void MainWindow::on_search_done() {
-    while (ui->new_documentList->count() > 0) {
-        delete ui->new_documentList->takeItem(0);
-    }
-
-    std::vector<bitmile::db::Document> docs = main_controller_.getSearchedDoc();
+    std::vector<bitmile::db::Document> docs = account_manager_->getSearchedDoc();
+    m_docids.clear();
 
     for (int i = 0; i < docs.size(); i++) {
-        ui->new_documentList->addItem(QString (docs[i].GetElasticDocId().c_str()));
+        m_docids.append(QString (docs[i].GetElasticDocId().c_str()));
     }
-    ui->new_searchResultFrame->show();
+
+    Q_EMIT docIdsChanged(m_docids);
 }
 
 
-void MainWindow::on_new_createDealButton_clicked()
+bool MainWindow::on_new_createDealButton_clicked()
 {
-    //create new deal, publish it to blockchain
-    if (ui->new_dealPrize->text() == "") {
+    bool check = true;
+    check &= account_manager_->createDeal(m_blockchainAddr.toStdString(), m_passphase.toStdString());
 
-    }
+    if (!check)
+        return false;
 
-    if (ui->new_blockchainAddr->text() == "") {
-
-    }
-
-    if (ui->new_blockchainPass->text() == "") {
-
-    }
-    main_controller_.createDeal(ui->new_blockchainAddr->text().toStdString(),
-                                ui->new_blockchainPass->text().toStdString());
-
+    check &= insertToInternalDB();
+    return check;
 }
+
+QString MainWindow::usernameTxt() const
+{
+    return m_accountTxt;
+}
+
+QString MainWindow::passwordTxt() const {
+    return m_passTxt;
+}
+
+void MainWindow::setUsername(QString usernameTxt)
+{
+    if (m_accountTxt == usernameTxt)
+        return;
+
+    m_accountTxt = usernameTxt;
+    Q_EMIT userNameChanged(m_accountTxt);
+}
+
+void MainWindow::setPassword(QString passwordTxt) {
+    if (m_passTxt == passwordTxt)
+        return;
+
+    m_passTxt = passwordTxt;
+    Q_EMIT passwordChanged(m_passTxt);
+}
+
+QList<QVariant> MainWindow::docIds() const{
+    return m_docids;
+}
+
+void MainWindow::setDocIds(QVariantList docIds) {
+    m_docids.clear();
+    m_docids = docIds;
+
+    Q_EMIT docIdsChanged(m_docids);
+}
+
+qreal MainWindow::dealPrice() const {
+    return m_dealPrice;
+}
+
+void MainWindow::setDealPrice(qreal dealPrice) {
+    if (m_dealPrice == dealPrice)
+        return;
+
+    m_dealPrice = dealPrice;
+
+    Q_EMIT dealPriceChanged(m_dealPrice);
+}
+
+QString MainWindow::blockchainAddr() const {
+    return m_blockchainAddr;
+}
+
+void MainWindow::setBlockchainAddr(QString blockchainAddr) {
+    if (m_blockchainAddr == blockchainAddr)
+        return;
+
+    m_blockchainAddr = blockchainAddr;
+    Q_EMIT (m_blockchainAddr);
+}
+
+QString MainWindow::passphase() const {
+    return m_passphase;
+}
+
+void MainWindow::setPassphase(QString passphase) {
+    if (m_passphase == passphase)
+        return;
+
+    m_passphase = passphase;
+    Q_EMIT passphaseChanged(m_passphase);
+}
+
+QVariantList MainWindow::keywords() const {
+    return m_keywords;
+}
+
+void MainWindow::setKeywords(QVariantList keywords) {
+    m_keywords.clear();
+    m_keywords = keywords;
+    Q_EMIT keywordsChanged(m_keywords);
+}
+
+bool MainWindow::insertToInternalDB() {
+    std::vector<bitmile::db::Document> searched_doc = account_manager_->getSearchedDoc();
+
+    // if searched doc is empty , not continue process
+    if (searched_doc.size() == 0)
+        return true;
+
+    // insert deal data to db
+    InternalDB::Deal deal;
+
+    deal.price = m_dealPrice;
+    deal.private_key = account_manager_->getSecretKey();
+    deal.public_key =  account_manager_->getPublicKey();
+
+    // set current timesamp in local device, confirm for change ???
+    deal.time = QDateTime::currentMSecsSinceEpoch();
+
+    // create continuous string from keywords
+    QJsonArray listKeyword;
+    std::set<std::string> keywords = account_manager_->getKeywords();
+
+    for (std::set<std::string>::iterator i = keywords.begin(); i != keywords.end() ; i++) {
+        listKeyword.append(QJsonValue(QString::fromStdString(*i)));
+    }
+
+    deal.keywords = QJsonDocument(listKeyword).toJson(QJsonDocument::Compact);
+    qDebug() << "MainWindow Controller deal.keywords " << deal.keywords;
+
+    InternalDB::getInstance()->insertDealData(deal);
+
+    InternalDB::Owner owner;
+    InternalDB::DealOwner dealOwner;
+
+    for (std::vector<bitmile::db::Document>::iterator i = searched_doc.begin(); i != searched_doc.end(); i++) {
+        owner.address = QString::fromStdString((*i).GetOwnerAddress());
+        qDebug() << owner.address;
+
+        InternalDB::getInstance()->insertOwnerData(owner);
+
+        dealOwner.deal_time = deal.time;
+        dealOwner.owner_address = owner.address;
+        dealOwner.status = DEALOWNER_STATUS_WAITING;
+        dealOwner.encrypt_data = QString("");
+        dealOwner.decrypt_data = QString("");
+        dealOwner.owner_secret_key = QString("");
+        dealOwner.owner_doc_id = QString::fromStdString((*i).GetOwnerDocId());
+        dealOwner.elastic_id = QString::fromStdString((*i).GetElasticDocId());
+        InternalDB::getInstance()->insertDealOwnerData(dealOwner);
+    }
+
+    DealManager::getInstance()->updateDealData();
+    DealManager::getInstance()->updateDealOwnerData();
+    return true;
+}
+

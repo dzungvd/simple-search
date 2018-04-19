@@ -6,7 +6,7 @@
 
 QT       += core gui
 QT       += sql
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4): QT += quick
 
 TARGET = enterprise
 TEMPLATE = app
@@ -34,11 +34,12 @@ SOURCES += \
     ../../vendors/cpp-elasticsearch/src/elasticsearch/elasticsearch.cpp \
     ../../vendors/cpp-elasticsearch/src/http/http.cpp \
     ../../vendors/cpp-elasticsearch/src/json/json.cpp \
-    mainwindow_controller.cpp \
     zmq_manager.cpp \
     ../../utils/utils.cpp \
     ../../blockchain/blockchain_interface.cpp \
-    internaldb.cpp
+    internaldb.cpp \
+    dealmanager.cpp \
+    accountmanager.cpp
 
 
 HEADERS += \
@@ -50,15 +51,17 @@ HEADERS += \
     ../../vendors/cpp-elasticsearch/src/elasticsearch/elasticsearch.h \
     ../../vendors/cpp-elasticsearch/src/http/http.h \
     ../../vendors/cpp-elasticsearch/src/json/json.h \
-    mainwindow_controller.h \
     zmq_manager.h \
     utils.h \
     ../../utils/utils.h \
     ../../blockchain/blockchain_interface.h \
-    internaldb.h
+    internaldb.h \
+    dealmanager.h \
+    accountmanager.h
 
-FORMS += \
-        mainwindow.ui
+
+RESOURCES += \
+    qml.qrc
 
 INCLUDEPATH += ../../vendors/nlohmann_json/ ../../ ../../vendors/cpp-elasticsearch/src/
 
@@ -146,3 +149,5 @@ else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../vendo
 else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../vendors/openssl_1.1.0g/lib/release/ssl.lib
 else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../vendors/openssl_1.1.0g/lib/debug/ssl.lib
 else:unix: PRE_TARGETDEPS += $$PWD/../../vendors/openssl_1.1.0g/lib/libssl.a
+
+DISTFILES +=

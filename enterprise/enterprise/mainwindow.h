@@ -1,54 +1,94 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
 #include <QDir>
 #include <QDebug>
-#include <QListWidgetItem>
-#include "mainwindow_controller.h"
+#include <QObject>
+#include "accountmanager.h"
+#include <QVector>
+#include <QVariant>
 
-namespace Ui {
-class MainWindow;
-}
-
-class MainWindow : public QMainWindow
+class MainWindow : public QObject
 {
     Q_OBJECT
 
+    // account infomation
+    Q_PROPERTY(QString usernameTxt READ usernameTxt WRITE setUsername NOTIFY userNameChanged)
+    Q_PROPERTY(QString passwordTxt READ passwordTxt WRITE setPassword NOTIFY passwordChanged)
+
+    // deals information
+    Q_PROPERTY(QVariantList docIds READ docIds WRITE setDocIds NOTIFY docIdsChanged)
+    Q_PROPERTY(qreal dealPrice READ dealPrice WRITE setDealPrice NOTIFY dealPriceChanged)
+    Q_PROPERTY(QString blockchainAddr READ blockchainAddr WRITE setBlockchainAddr NOTIFY blockchainAddrChanged)
+    Q_PROPERTY(QString passphase READ passphase WRITE setPassphase NOTIFY passphaseChanged)
+    Q_PROPERTY(QVariantList keywords READ keywords WRITE setKeywords NOTIFY keywordsChanged)
+
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(QObject *parent = 0);
     ~MainWindow();
-private Q_SLOTS:
+
+    QString usernameTxt() const;
+    QString passwordTxt() const;
+    QVariantList docIds() const;
+    qreal dealPrice() const;
+    QString blockchainAddr() const;
+    QString passphase() const;
+    QVariantList keywords() const;
+
+public Q_SLOTS:
+    void setUsername(QString usernameTxt);
+    void setPassword(QString passwordTxt);
+    void setDocIds(QVariantList docIds);
+    void setDealPrice(qreal dealPrice);
+    void setBlockchainAddr(QString blockchainAddr);
+    void setPassphase (QString passphase);
+    void setKeywords(QVariantList keywords);
 
     //register page slot
-    void on_reg_registerButton_clicked();
-
-    void on_reg_LoginButton_clicked();
-
-    //login page slot
-    void on_log_registerButton_clicked();
-
-    void on_log_loginButton_clicked();
+    Q_INVOKABLE bool onRegister();
+    Q_INVOKABLE bool onLogin();
 
     //setting page slot
-    void on_deal_logout_clicked();
+    Q_INVOKABLE void onLogout();
 
+Q_SIGNALS:
+    void userNameChanged(QString usernameTxt);
+    void passwordChanged(QString passwordTxt);
+    void docIdsChanged(QVariantList docIds);
+    void dealPriceChanged(qreal dealPrice);
+    void blockchainAddrChanged(QString blockchainAddr);
+    void passphaseChanged(QString passphase);
+    void keywordsChanged(QVariantList keywords);
+
+public Q_SLOTS:
     //new deal page slot
-    void on_new_addKeyword_returnPressed();
+    Q_INVOKABLE void on_new_keyword_changed  ();
 
-    void on_new_keyword_changed ();
+    Q_INVOKABLE void on_new_keywordList_itemDoubleClicked(QVariant item);
 
-    void on_new_keywordList_itemDoubleClicked(QListWidgetItem *item);
+    Q_INVOKABLE void on_new_searchButton_clicked();
 
-    void on_new_searchButton_clicked();
+    Q_INVOKABLE void on_search_done();
 
-    void on_search_done();
-
-    void on_new_createDealButton_clicked();
+    Q_INVOKABLE bool on_new_createDealButton_clicked();
 
 private:
-    Ui::MainWindow *ui;
-    MainwindowController main_controller_;
+    bool insertToInternalDB();
+
+private:
+    // account
+    QString m_accountTxt;
+    QString m_passTxt;
+
+    // deal infor
+    QVariantList m_docids;
+    qreal m_dealPrice;
+    QString m_blockchainAddr;
+    QString m_passphase;
+    QVariantList m_keywords;
+
+    // interact with blockchain
+    AccountManager* account_manager_;
 };
 
 #endif // MAINWINDOW_H

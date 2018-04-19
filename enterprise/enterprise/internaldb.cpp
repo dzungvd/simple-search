@@ -50,6 +50,12 @@ QString InternalDB::getSqlDbName() const {
     return sqlDbName;
 }
 
+
+QSqlQuery* InternalDB::getSqlQuery() {
+    return &sqlQuery;
+}
+
+
 bool InternalDB::createDB() {
     QString q;
 
@@ -63,7 +69,7 @@ bool InternalDB::createDB() {
 
     // create Deal table
     q = QString ("CREATE TABLE IF NOT EXISTS %1 (%2 DOUBLE, "
-                 "                 %3 BLOB, %4 BLOB, %5 BLOB, %6 UNSIGNED BIG INT PRIMARY KEY)"
+                 "                 %3 BLOB, %4 BLOB, %5 BLOB, %6 BLOB PRIMARY KEY)"
                  ).arg(DEAL_TABLE, DEAL_PRICE,
                        DEAL_PUBLICKEY, DEAL_PRIVATEKEY,
                        DEAL_KEYWORDS, DEAL_TIME);
@@ -74,8 +80,8 @@ bool InternalDB::createDB() {
     }
 
     // create DealOwner Table
-    q = QString ("CREATE TABLE IF NOT EXISTS %1 (%2 UNSIGNED BIG INT, %3 BLOB, "
-                 "                 %4 INT, %5 BLOB, %6 BLOB, %7 BLOB, %8 UNSIGNED BIG INT, %9 UNSIGNED BIG INT)"
+    q = QString ("CREATE TABLE IF NOT EXISTS %1 (%2 BLOB, %3 BLOB, "
+                 "                 %4 INT, %5 BLOB, %6 BLOB, %7 BLOB, %8 BLOB, %9 BLOB)"
                  ).arg(DEALOWNER_TABLE, DEALOWNER_DEAL_TIME, DEALOWNER_OWNER_ADDRESS,
                        DEALOWNER_STATUS, DEALOWNER_ENCRYPT_DATA, DEALOWNER_DECRYPT_DATA,
                        DEALOWNER_SECRETKEY, DEALOWNER_DOC_ID, DEALOWNER_ELASTICID);
@@ -145,7 +151,7 @@ bool InternalDB::removeOwnerData(const Owner& _data) {
 
 // interact with DealOwner table
 bool InternalDB::insertDealOwnerData(const DealOwner& _data) {
-    QString q = "INSERT INTO %1 VALUES (:d2,':d3', :d4, ':d5', ':d6', ':d7', :d8, :d9)";
+    QString q = "INSERT INTO %1 VALUES (:d2,':d3', :d4, ':d5', ':d6', ':d7', ':d8', ':d9')";
     q = q.arg(DEALOWNER_TABLE);
 
     q.replace(":d2", convertToString(_data.deal_time));
@@ -161,8 +167,8 @@ bool InternalDB::insertDealOwnerData(const DealOwner& _data) {
 }
 
 bool InternalDB::updateDealOwnerData(const DealOwner& _data) {
-    QString q = "UPDATE %1 SET %2=:d2, %3=':d3', %4=':d4', %5=':d5', %6=:d6, %7=:d7 "
-                "WHERE %8=:d8 AND %9=':d9'";
+    QString q = "UPDATE %1 SET %2=:d2, %3=':d3', %4=':d4', %5=':d5', %6=':d6', %7=':d7' "
+                "WHERE %8=':d8' AND %9=':d9'";
 
     q = q.arg(DEALOWNER_TABLE, DEALOWNER_STATUS, DEALOWNER_ENCRYPT_DATA
           ,DEALOWNER_DECRYPT_DATA, DEALOWNER_SECRETKEY,
