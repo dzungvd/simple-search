@@ -299,6 +299,11 @@ AbstractScreen {
                         account.dealPrice = parseInt(price.text);
                         account.blockchainAddr = blockChainAddress.text;
                         account.passphase = passphase.text;
+
+                        var date = new Date(Date.now());
+                        date.setDate (date.getDate() + 90);
+
+                        account.dealExpiredTime = date;
                         account.on_new_createDealButton_clicked();
                     }
                 }

@@ -101,12 +101,13 @@ void MainWindow::on_search_done() {
 bool MainWindow::on_new_createDealButton_clicked()
 {
     bool check = true;
-    check &= account_manager_->createDeal(m_blockchainAddr.toStdString(), m_passphase.toStdString());
+    int global_id = 0;
+    check &= account_manager_->createDeal(m_blockchainAddr.toStdString(), m_passphase.toStdString(), m_dealPrice, m_expiredTime, global_id);
 
     if (!check)
         return false;
 
-    check &= insertToInternalDB();
+    check &= insertToInternalDB(global_id);
     return check;
 }
 
@@ -160,6 +161,15 @@ void MainWindow::setDealPrice(qreal dealPrice) {
     Q_EMIT dealPriceChanged(m_dealPrice);
 }
 
+QDateTime MainWindow::dealExpiredTime() const {
+    return m_expiredTime;
+}
+
+void MainWindow::setExpiredTime(QDateTime time) {
+    m_expiredTime = time;
+    Q_EMIT (m_expiredTime);
+}
+
 QString MainWindow::blockchainAddr() const {
     return m_blockchainAddr;
 }
@@ -194,7 +204,7 @@ void MainWindow::setKeywords(QVariantList keywords) {
     Q_EMIT keywordsChanged(m_keywords);
 }
 
-bool MainWindow::insertToInternalDB() {
+bool MainWindow::insertToInternalDB(int global_id) {
     std::vector<bitmile::db::Document> searched_doc = account_manager_->getSearchedDoc();
 
     // if searched doc is empty , not continue process
@@ -204,6 +214,7 @@ bool MainWindow::insertToInternalDB() {
     // insert deal data to db
     InternalDB::Deal deal;
 
+    deal.global_id = global_id;
     deal.price = m_dealPrice;
     deal.private_key = account_manager_->getSecretKey();
     deal.public_key =  account_manager_->getPublicKey();

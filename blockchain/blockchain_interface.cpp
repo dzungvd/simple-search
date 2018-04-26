@@ -14,7 +14,8 @@ namespace bitmile {
         {RPC_API::SEND_TRANSACTION, "eth_sendTransaction"},
         {RPC_API::ESTIMATE_GAS, "eth_estimateGas"},
         {RPC_API::CREATE_FILTER, "eth_newFilter"},
-        {RPC_API::GET_FILTER_LOGS, "eth_getFilterLogs"}
+        {RPC_API::GET_FILTER_LOGS, "eth_getFilterLogs"},
+        {RPC_API::GET_BLOCK_NUMBER, "eth_blockNumber"}
     };
 
 
@@ -119,6 +120,14 @@ namespace bitmile {
 
     bool BlockchainInterface::GetFilterLogs(std::string filter, std::string id, nlohmann::json& result) {
         result = CreateMessage(api_def_[RPC_API::GET_FILTER_LOGS], nlohmann::json::array({filter}), id);
+        if (result.count("result") == 1) {
+            return true;
+        }
+        return false;
+    }
+
+    bool BlockchainInterface::GetBlockNumber(std::string id, nlohmann::json &result) {
+        result = CreateMessage(api_def_[RPC_API::GET_BLOCK_NUMBER], nlohmann::json::array(), id);
         if (result.count("result") == 1) {
             return true;
         }

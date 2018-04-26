@@ -22,7 +22,8 @@ namespace bitmile {
         SEND_TRANSACTION,
         ESTIMATE_GAS,
         CREATE_FILTER,
-        GET_FILTER_LOGS
+        GET_FILTER_LOGS,
+        GET_BLOCK_NUMBER
       };
 
       typedef std::map<RPC_API, std::string> ApiDef;
@@ -37,7 +38,7 @@ namespace bitmile {
       bool EstimateGas (std::string sender, std::string receiver, std::string value, std::string gas, std::string data, std::string id, nlohmann::json& result);
       bool Createfilter (std::string fromBlock, std::string toBlock, std::string address, std::vector<std::string> topics, std::string id, nlohmann::json& result);
       bool GetFilterLogs (std::string filter, std::string id, nlohmann::json& result);
-
+      bool GetBlockNumber (std::string id, nlohmann::json& result);
     private:
       static size_t CurlWriteCallbackStdString (void *contents, size_t size, size_t nmemb, void *s);
       nlohmann::json CreateMessage (std::string method, nlohmann::json params, std::string id);

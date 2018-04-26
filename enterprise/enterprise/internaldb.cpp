@@ -69,10 +69,10 @@ bool InternalDB::createDB() {
 
     // create Deal table
     q = QString ("CREATE TABLE IF NOT EXISTS %1 (%2 DOUBLE, "
-                 "                 %3 BLOB, %4 BLOB, %5 BLOB, %6 BLOB PRIMARY KEY)"
+                 "                 %3 BLOB, %4 BLOB, %5 BLOB, %6 BLOB PRIMARY KEY, %7 INT)"
                  ).arg(DEAL_TABLE, DEAL_PRICE,
                        DEAL_PUBLICKEY, DEAL_PRIVATEKEY,
-                       DEAL_KEYWORDS, DEAL_TIME);
+                       DEAL_KEYWORDS, DEAL_TIME, DEAL_GLOBAL_ID);
 
     if (!query(q)) {
         qDebug() << "Have error when create DEAL_TABLE";
@@ -97,7 +97,7 @@ bool InternalDB::createDB() {
 
 // interact with Deal table
 bool InternalDB::insertDealData(const Deal& _data) {
-    QString q = "INSERT INTO %1 VALUES (:d2, ':d3', ':d4', ':d5', :d6)";
+    QString q = "INSERT INTO %1 VALUES (:d2, ':d3', ':d4', ':d5', :d6, :d7)";
     q = q.arg(DEAL_TABLE);
 
     q.replace(":d2", convertToString(_data.price));
@@ -105,12 +105,12 @@ bool InternalDB::insertDealData(const Deal& _data) {
     q.replace(":d4", convertToString(_data.private_key));
     q.replace(":d5", convertToString(_data.keywords));
     q.replace(":d6", convertToString(_data.time));
-
+    q.replace(":d7", convertToString(_data.global_id));
     return query(q);
 }
 
 bool InternalDB::updateDealData(const Deal& _data) {
-    QString q = "UPDATE %1 SET %2=:d2, %3=':d3', %4=':d4', %5=':d5' WHERE %6=:d6";
+    QString q = "UPDATE %1 SET %2=:d2, %3=':d3', %4=':d4', %5=':d5', %7=:d7 WHERE %6=:d6";
     q = q.arg(DEAL_TABLE, DEAL_PRICE, DEAL_PUBLICKEY, DEAL_PRIVATEKEY, DEAL_KEYWORDS, DEAL_TIME);
 
     q.replace(":d2",  convertToString(_data.price));
@@ -118,7 +118,7 @@ bool InternalDB::updateDealData(const Deal& _data) {
     q.replace(":d4",  convertToString(_data.private_key));
     q.replace(":d5",  convertToString(_data.keywords));
     q.replace(":d6",  convertToString(_data.time));
-
+    q.replace(":d7",  convertToString(_data.global_id));
    return query(q);
 }
 

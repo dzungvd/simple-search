@@ -18,6 +18,7 @@
 #define     DEAL_PRIVATEKEY "private_key"               // BLOB             <- BASE64
 #define     DEAL_KEYWORDS "keywords"                    // BLOB             <- JSON format ["","",...]}
 #define     DEAL_TIME "time"                            // BLOB             <- timestame
+#define     DEAL_GLOBAL_ID "global_id"                  // INT
 
 #define DEALOWNER_TABLE "DealOwner"
 #define     DEALOWNER_DEAL_TIME "deal_time"             // BLOB
@@ -40,6 +41,7 @@ public:
 
     struct Deal {
        qreal    price;
+       qint64   global_id;
        QString  public_key;
        QString  private_key;
        QString  keywords;
