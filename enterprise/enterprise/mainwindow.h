@@ -8,7 +8,8 @@
 #include <QVector>
 #include <QVariant>
 #include <QDateTime>
-
+#include "blockchainWorkerThread.h"
+#include "blockchain/blockchain_interface.h"
 class MainWindow : public QObject
 {
     Q_OBJECT
@@ -47,6 +48,9 @@ public Q_SLOTS:
     void setBlockchainAddr(QString blockchainAddr);
     void setPassphase (QString passphase);
     void setKeywords(QVariantList keywords);
+
+    void updateDealAnswers (std::vector<int64_t> deal_ids, std::vector<int> answer_numbs);
+    void updateDealKey (std::vector<int64_t> deal_ids, std::vector<int> key_numbs);
 
     //register page slot
     Q_INVOKABLE bool onRegister();
@@ -94,7 +98,10 @@ private:
     QVariantList m_keywords;
 
     // interact with blockchain
+    BlockchainWorkerThread* blockchain_event_;
+    bitmile::blockchain::BlockchainInterface blockchain_;
     AccountManager* account_manager_;
+
 };
 
 #endif // MAINWINDOW_H

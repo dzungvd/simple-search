@@ -4,8 +4,17 @@
 #include <QObject>
 #include <QThread>
 #include <QMutex>
+#include <QMap>
+#include <QSqlQuery>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonValue>
+#include <QVariant>
 #include "blockchain/blockchain_interface.h"
 #include "nlohmann/json.hpp"
+#include "internaldb.h"
+#include "config.h"
 
 class BlockchainWorkerThread : public QThread
 {
@@ -13,7 +22,7 @@ class BlockchainWorkerThread : public QThread
     void run() override;
 
 public:
-    BlockchainWorkerThread(std::vector<int64_t> deal_ids, std::vector<int> answer_numbs, std::vector<int> key_numbs, std::string deal_address);
+    BlockchainWorkerThread();
     void addDeal (int64_t deal_id, int answer_numb, int key_numb);
 Q_SIGNALS:
     void newAnswers (std::vector<int64_t> deal_ids, std::vector<int> answer_numbs);

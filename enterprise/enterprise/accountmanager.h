@@ -7,6 +7,7 @@
 #include "zmq_manager.h"
 #include "utils/utils.h"
 #include "blockchain/blockchain_interface.h"
+#include "config.h"
 
 #include <sio_client.h>
 #include <QDir>

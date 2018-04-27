@@ -1,12 +1,63 @@
 #include "blockchainWorkerThread.h"
 
-BlockchainWorkerThread::BlockchainWorkerThread(std::vector<int64_t> deal_ids, std::vector<int> answer_numbs,
-                                               std::vector<int> key_numbs, std::string deal_address)
+BlockchainWorkerThread::BlockchainWorkerThread()
 {
+    std::vector<int64_t> deal_ids;
+    std::vector<int> answer_numbs;
+    std::vector<int> key_numbs;
+
+
+    InternalDB* db = InternalDB::getInstance();
+
+    //get all deal
+    QString deal_q = "SELECT * FROM Deal";
+
+    if (!db->query(deal_q))
+        return;
+    QSqlQuery* queryObj = db->getSqlQuery();
+    QMap<qint64, InternalDB::Deal> dealMap;
+    InternalDB::Deal deal;
+    while (queryObj->next()) {
+        deal.global_id = queryObj->value(InternalDB::DEAL_GLOBAL_ID_INDEX).toLongLong();
+        deal.time = queryObj->value(InternalDB::DEAL_TIME_INDEX).toLongLong();
+        dealMap.insert (deal.time, deal);
+    }
+
+
+    QString q = "SELECT * FROM DealOwner";
+
+    if (!db->query(q))
+        return;
+
+    queryObj = db->getSqlQuery();
+
+    InternalDB::DealOwner dealOwner;
+
+
+    while (queryObj->next()) {
+        dealOwner.deal_time = queryObj->value(InternalDB::DEALOWNER_DEALTIME_INDEX).toLongLong();
+        dealOwner.owner_secret_key = queryObj->value(InternalDB::DEALOWNER_SECRET_KEY_INDEX).toString();
+        dealOwner.status = queryObj->value(InternalDB::DEALOWNER_STATUS_INDEX).toInt();
+
+        deal_ids.push_back(dealMap.find(dealOwner.deal_time).value().global_id);
+
+        int answer_count = 0;
+        if (dealOwner.status != DEALOWNER_STATUS_WAITING) {
+            answer_count++;
+        }
+        answer_numbs.push_back(answer_count);
+
+        int key_count = 0;
+        if (dealOwner.owner_secret_key != "") {
+            key_count++;
+        }
+        key_numbs.push_back(key_count);
+    }
+
     deal_ids_ = deal_ids;
     answer_numbs_ = answer_numbs;
     key_numbs_ = key_numbs;
-    deal_address_ = deal_address;
+    deal_address_ = Config::getInstance()->getDealContractAddress();
 }
 
 void BlockchainWorkerThread::run() {

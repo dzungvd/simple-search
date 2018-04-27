@@ -32,6 +32,7 @@
 #define     DEALOWNER_SECRETKEY "owner_secret_key"      // BLOB             <- BASE64
 #define     DEALOWNER_DOC_ID "owner_doc_id"             // BLOB             <- TEXT
 #define     DEALOWNER_ELASTICID  "elastic_id"           // BLOB             <- TEXT
+#define     DEALOWNER_NONCE "nonce"
 
 class InternalDB : public QObject {
     Q_OBJECT
@@ -41,11 +42,11 @@ public:
 
     struct Deal {
        qreal    price;
-       qint64   global_id;
        QString  public_key;
        QString  private_key;
        QString  keywords;
        qint64   time;
+       qint64   global_id;
     };
 
     enum DEAL_PROPERTY_INDEX {
@@ -53,7 +54,8 @@ public:
         DEAL_PUBLIC_KEY_INDEX,
         DEAL_PRIVATE_KEY_INDEX,
         DEAL_KEYWORDS_INDEX,
-        DEAL_TIME_INDEX
+        DEAL_TIME_INDEX,
+        DEAL_GLOBAL_ID_INDEX
     };
 
     struct Owner {
@@ -73,6 +75,7 @@ public:
         QString owner_secret_key;
         QString owner_doc_id;
         QString elastic_id;
+        QString nonce;
     };
 
     enum DEALOWNER_PROPERTY_INDEX {
@@ -83,7 +86,8 @@ public:
         DEALOWNER_DECRYPT_DATA_INDEX,
         DEALOWNER_SECRET_KEY_INDEX,
         DEALOWNER_DOC_ID_INDEX,
-        DEALOWNER_ELASTIC_ID_INDEX
+        DEALOWNER_ELASTIC_ID_INDEX,
+        DEALOWNER_NONCE_INDEX
     };
 
     enum DEALOWNER_STATUS_VALUE {
@@ -99,6 +103,7 @@ public:
     bool insertDealData(const Deal&);
     bool updateDealData(const Deal&);
     bool removeDealData(const Deal&);
+    Deal getDeal (const qint64 id);
 
     // interact with Owner table
     bool insertOwnerData(const Owner&);
@@ -109,6 +114,7 @@ public:
     bool insertDealOwnerData(const DealOwner&);
     bool updateDealOwnerData(const DealOwner&);
     bool removeDealOwnerData(const DealOwner&);
+    DealOwner getDealOwner (const qint64 dealTime, QString owner_address);
 
     // utils
     bool establiseConnection();

@@ -148,8 +148,8 @@ bool AccountManager::createDeal(std::string blockchain_addr, std::string blockch
 
     std::string latest_block;
 
-    deal_contract_addr_ = "0xb6b29ef90120bec597939e0eda6b8a9164f75deb";
-    owner_key_addr_ = "0x54a3ecc66008a40bd05988272b484c7d5f6359a5";
+    deal_contract_addr_ = Config::getInstance()->getDealContractAddress();
+    owner_key_addr_ = Config::getInstance()->getOwnerKeyContractAddress();
 
     std::string transaction_hash;
     if (check) {

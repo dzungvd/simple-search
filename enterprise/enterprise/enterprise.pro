@@ -40,7 +40,8 @@ SOURCES += \
     internaldb.cpp \
     dealmanager.cpp \
     accountmanager.cpp \
-    blockchainWorkerThread.cpp
+    blockchainWorkerThread.cpp \
+    config.cpp
 
 
 HEADERS += \
@@ -58,7 +59,8 @@ HEADERS += \
     internaldb.h \
     dealmanager.h \
     accountmanager.h \
-    blockchainWorkerThread.h
+    blockchainWorkerThread.h \
+    config.h
 
 
 RESOURCES += \
