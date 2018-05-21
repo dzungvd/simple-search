@@ -11,10 +11,13 @@ MainWindow::MainWindow(QObject *parent) : QObject(parent)
     //get current database info
 
     blockchain_event_ = new BlockchainWorkerThread();
+
+    // for answer event
     connect (blockchain_event_, SIGNAL (newAnswers),
              this, SLOT (updateDealAnswers));
     connect (blockchain_event_, SIGNAL (newKeys),
              this, SLOT (updateDealKey));
+
     blockchain_event_->start();
 
     account_manager_ = AccountManager::getInstance();
@@ -90,7 +93,7 @@ void MainWindow::on_new_searchButton_clicked()
 {
     account_manager_->clearKeywords();
     for (QVariantList::iterator i = m_keywords.begin(); i != m_keywords.end(); i++)
-        account_manager_->addKeyword((*i).toString().toLower().toStdString());
+        account_manager_->addKeyword((*i).toString().toStdString());
 
     account_manager_->search();
 }
@@ -110,7 +113,7 @@ void MainWindow::on_search_done() {
 bool MainWindow::on_new_createDealButton_clicked()
 {
     bool check = true;
-    int global_id = 0;
+    int global_id = 177; //fake
     check &= account_manager_->createDeal(m_blockchainAddr.toStdString(), m_passphase.toStdString(), m_dealPrice, m_expiredTime, global_id);
 
     if (!check)

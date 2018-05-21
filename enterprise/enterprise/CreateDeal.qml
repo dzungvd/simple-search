@@ -259,7 +259,7 @@ AbstractScreen {
                     width: parent.itemWidth
                     height: parent.itemHeight
                     anchors.horizontalCenter: parent.horizontalCenter
-                    placeholderText: "Blockchain Address"
+                    placeholderText: "Wallet Address"
                     font.pixelSize: parent.pixelSizeCommon
                     horizontalAlignment: Text.AlignLeft
                     verticalAlignment: Text.AlignVCenter
