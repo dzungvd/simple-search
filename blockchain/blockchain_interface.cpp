@@ -4,7 +4,7 @@ namespace bitmile {
   namespace blockchain {
 
     BlockchainInterface::BlockchainInterface () {
-      curl_.add<CURLOPT_URL>("http://localhost");
+      curl_.add<CURLOPT_URL>("http://192.168.1.167");
       curl_.add<CURLOPT_PORT>(8545);
     }
 
@@ -33,13 +33,15 @@ namespace bitmile {
 
 
     bool BlockchainInterface::UnlockAccount (std::string account, std::string passphrase, int time) {
-
+      std::cout << "BlockchainInterface::UnlockAccount " << account << std::endl;
       nlohmann::json reply = CreateMessage(api_def_[RPC_API::UNLOCK_ACCOUNT], nlohmann::json::array({account, passphrase, time}), "1");
       if (reply.count("result") == 1) {
           if (reply["result"]) {
+              std::cout << "BlockchainInterface::UnlockAccount true" << std::endl;
               return true;
           }
       }
+      std::cout << "BlockchainInterface::UnlockAccount false" << std::endl;
       return false;
     }
 
@@ -205,9 +207,13 @@ namespace bitmile {
 
         //prize: uint256
         std::string prize_str = Utils::zeroLeadPad(Utils::convertToHex(prize), prize_byte_len * 2);
+        std::cout << "prize hex " << prize_str<< std::endl;
 
         //expired time: uint256
         std::string expired_time_str = Utils::zeroLeadPad(Utils::convertToHex(expired_time), expired_time_byte_len * 2);
+        std::cout << "expired_time_str hex " << expired_time_str << std::endl;
+
+        std::cout << "prize_byte_len + expired_time_byte_len "  << Utils::zeroLeadPad(Utils::convertToHex(prize_byte_len + expired_time_byte_len + 32), 32 * 2) << std::endl;
 
         std::stringstream stream;
         stream << "0x"
@@ -216,12 +222,19 @@ namespace bitmile {
                << expired_time_str
                << Utils::zeroLeadPad(Utils::convertToHex(prize_byte_len + expired_time_byte_len + 32), 32 * 2);
 
-        stream << Utils::zeroLeadPad(Utils::convertToHex(public_key.length()), 32 * 2);
+        std::string public_key_hex = Utils::convertToHex(reinterpret_cast<const unsigned char*> (public_key.c_str()), 32);
+        std::cout << "public_key_hex " << public_key_hex << std::endl;
+
+        std::cout << "public_key.length() " << public_key.length() << std::endl;
+        stream << Utils::zeroLeadPad(Utils::convertToHex(public_key_hex.length()), 32 * 2);
+
         size_t block_size = 32;
         while (block_size < public_key.length()) {
             block_size += 32;
         }
-        stream << Utils::zeroTrailPad(Utils::convertToHex(reinterpret_cast<const unsigned char*> (public_key.c_str()), public_key.length()), block_size * 2);
+
+        stream << Utils::zeroTrailPad(Utils::convertToHex(reinterpret_cast<const unsigned char*> (public_key_hex.c_str()), public_key_hex.length()), block_size * 2);
+
         return stream.str();
     }
 
@@ -476,7 +489,8 @@ namespace bitmile {
     }
 
     OwnerKeyContract::FunctionDefinition OwnerKeyContract::functions_ = {
-        {GET_PUB_KEY, "getPubKey(address)"}
+        {GET_PUB_KEY, "getPubKeyRSA(address)"},
+        {GET_ALL_USER_KEY, "getAllUserKeyAddeds()"}
     };
 
     std::string OwnerKeyContract::GetFunctionHash(Functions def) {
@@ -524,12 +538,53 @@ namespace bitmile {
             Utils::convertFromHex(data.substr(0, 32 * 2), offset);
 
             long long len;
-            Utils::convertFromHex(data.substr(offset * 2, 32 * 2), len);
+            Utils::convertFromHex(data.substr(32 * 2, 32 * 2), len);
 
-            std::string key = data.substr(offset* 2 + 32 * 2, len * 2);
+            std::string key;
+            Utils::convertFromHex(data.substr(32 * 4, len*2), key);
 
             result["key"] = key;
         }
+
+        return result;
+    }
+
+    /*
+     * Get All User Id on blockchain
+     */
+    std::string OwnerKeyContract::GetAllUserId() {
+        std::string func_hash = GetFunctionABI(Functions::GET_ALL_USER_KEY);
+        std::string abi_hash = Utils::convertToHex(reinterpret_cast<const unsigned char*> (func_hash.c_str()), func_hash.length());
+
+        std::stringstream stream;
+        stream << "0x"
+               << abi_hash;
+        return stream.str();
+    }
+
+    nlohmann::json OwnerKeyContract::ParseGetAllUserId(nlohmann::json& in) {
+        nlohmann::json result;
+        if (in.count("result") == 1) {
+            std::string data = in["result"];
+            data = data.substr(2, data.length() - 2);
+
+            long long offset;
+            Utils::convertFromHex(data.substr(0, 32*2), offset);
+            std::cout << "DealContract::ParseGetAllUserKey offset " << offset << std::endl;
+
+            long long len;
+            Utils::convertFromHex(data.substr(32*2, 32 * 2), len);
+            std::cout << "DealContract::ParseGetAllUserKey len " << len << std::endl;
+
+            // add to array
+            std::string public_key;
+            for (int i = 1; i <= len; i++) {
+                public_key = std::string("0x") + Utils::trimZeroLead(data.substr(32*(2 + 2*i), 32 * 2));
+                std::cout << "DealContract::ParseGetAllUserKey public key content " << public_key << std::endl;
+                result.push_back(public_key);
+            }
+        }
+
         return result;
     }
 
